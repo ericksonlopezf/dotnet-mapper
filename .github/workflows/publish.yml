@@ -107,7 +107,7 @@ jobs:
             --settings coverlet.runsettings
 
       - name: Upload coverage to Codecov (publish gate)
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: "**/coverage.opencover.xml,**/coverage.cobertura.xml"
