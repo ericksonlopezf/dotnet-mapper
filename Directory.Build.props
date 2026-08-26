@@ -1,0 +1,68 @@
+<Project>
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+
+    <!-- NuGet package metadata -->
+    <Authors>Erickson Lopez</Authors>
+    <Company>Erickson Lopez</Company>
+    <Copyright>Copyright © Erickson Lopez. MIT License.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://ericksonlopez.dev/mapper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ericksonlopezf/dotnet-mapper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <CommonPackageTags>dotnet;csharp;mapper;mapping;object-mapper;source-generator;high-performance;aot</CommonPackageTags>
+    <PackageTags>$(CommonPackageTags)</PackageTags>
+
+    <!-- Build settings -->
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU5017;NU5118</WarningsNotAsErrors>
+    <NoWarn>$(NoWarn);NU1603;NU1608;CS0419;NU5017;NU5128;NU5019;NU5046;RS0024;NU1901;NU1902;NU1903;NU1904;NU5118;CA1716;CA1000;CA1510;CA1305;CA2016;CA1822;CA1805;CA1707;CA1859;CA1860;CA2263;CA2012;CA1861;RS1038</NoWarn>
+    <WarningLevel>5</WarningLevel>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+
+    <GenerateDocumentationFile Condition="'$(IsTestProject)' != 'true' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Samples' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Benchmarks'">true</GenerateDocumentationFile>
+
+    <!-- Strong Naming -->
+    <SignAssembly Condition="Exists('$(MSBuildThisFileDirectory)EricksonLopez.snk')">true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="Exists('$(MSBuildThisFileDirectory)EricksonLopez.snk')">$(MSBuildThisFileDirectory)EricksonLopez.snk</AssemblyOriginatorKeyFile>
+
+    <!-- Deterministic builds -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- SourceLink -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols Condition="'$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Generator' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Analyzers'">true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Security -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Analyzers.Tests' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.Generator.Tests' and '$(MSBuildProjectName)' != 'EricksonLopez.Mapper.AotSmokeTest' and Exists('$(MSBuildThisFileDirectory)tests\Common\MapperContractExtensions.cs')">
+    <Compile Include="$(MSBuildThisFileDirectory)tests\Common\MapperContractExtensions.cs" Link="Common\MapperContractExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('src'))">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Condition="!Exists('README.md')" />
+    <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Condition="!Exists('icon.png') and Exists('$(MSBuildThisFileDirectory)icon.png')" />
+  </ItemGroup>
+
+</Project>

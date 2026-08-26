@@ -1,0 +1,23 @@
+{
+  "stryker-config": {
+    "project": "EricksonLopez.Mapper.Generator.csproj",
+    "reporters": [
+      "cleartext",
+      "json"
+    ],
+    "thresholds": {
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "concurrency": 4,
+    "coverage-analysis": "off",
+    "target-framework": "net8.0",
+    "ignore-methods": [
+      "*Log*",
+      "*Metrics*",
+      "*Telemetry*",
+      "ConfigureAwait"
+    ]
+  }
+}

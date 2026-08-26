@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (18,25): error ELM002: Destination type 'TestNamespace.Dest' has no public constructors or factory methods
+  ]
+}

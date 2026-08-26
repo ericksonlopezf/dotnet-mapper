@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (16,33): error ELM003: Cannot convert from 'System.Collections.Generic.List<TSource>' to 'System.Collections.Generic.List<TDest>' for member 'Items'
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "stryker-config": {
+    "project": "EricksonLopez.Mapper.Generator.csproj",
+    "test-projects": [
+      "EricksonLopez.Mapper.Generator.Tests.csproj"
+    ],
+    "mutate": [
+      "**/*.cs",
+      "!bin/**",
+      "!obj/**",
+      "!**/*.g.cs",
+      "!**/*.AssemblyInfo.cs",
+      "!IsExternalInit.cs",
+      "!RoslynInvariants.cs",
+      "!EquatableArray.cs",
+      "!EquatableArrayExtensions.cs",
+      "!Models/**"
+    ],
+    "thresholds": {
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "coverage-analysis": "off",
+    "concurrency": 4,
+    "reporters": [
+      "html",
+      "json",
+      "cleartext",
+      "progress"
+    ],
+    "ignore-methods": [
+      "*Log*",
+      "*Metrics*",
+      "*Telemetry*",
+      "ConfigureAwait",
+      "Dispose"
+    ]
+  }
+}

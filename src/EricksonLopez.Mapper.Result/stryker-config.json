@@ -1,0 +1,12 @@
+{
+  "stryker-config": {
+    "ignore-methods": [
+      "*ConfigureAwait*"
+    ],
+    "thresholds": {
+      "high": 100,
+      "low": 95,
+      "break": 90
+    }
+  }
+}
