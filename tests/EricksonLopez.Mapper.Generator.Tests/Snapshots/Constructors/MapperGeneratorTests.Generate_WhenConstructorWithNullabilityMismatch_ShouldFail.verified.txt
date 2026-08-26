@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (17,25): error ELM004: Possible null reference assignment for member 'name' from 'string?' to 'string'
+  ]
+}

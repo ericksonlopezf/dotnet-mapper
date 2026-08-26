@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (17,25): error ELM003: Cannot convert from 'int' to 'string' for member 'value'
+  ]
+}

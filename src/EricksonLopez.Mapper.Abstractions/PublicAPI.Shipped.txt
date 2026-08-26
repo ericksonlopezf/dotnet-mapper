@@ -1,0 +1,36 @@
+#nullable enable
+EricksonLopez.Mapper.GenerateMapperRegistrationAttribute
+EricksonLopez.Mapper.GenerateMapperRegistrationAttribute.GenerateMapperRegistrationAttribute() -> void
+EricksonLopez.Mapper.IConverter<TSource, TDestination>
+EricksonLopez.Mapper.IConverter<TSource, TDestination>.Convert(TSource source) -> TDestination
+EricksonLopez.Mapper.MapDerivedTypeAttribute
+EricksonLopez.Mapper.MapDerivedTypeAttribute.MapDerivedTypeAttribute(System.Type! sourceType, System.Type! targetType) -> void
+EricksonLopez.Mapper.MapDerivedTypeAttribute.SourceType.get -> System.Type!
+EricksonLopez.Mapper.MapDerivedTypeAttribute.TargetType.get -> System.Type!
+EricksonLopez.Mapper.MapFactoryAttribute
+EricksonLopez.Mapper.MapFactoryAttribute.MapFactoryAttribute(string! methodName) -> void
+EricksonLopez.Mapper.MapFactoryAttribute.MethodName.get -> string!
+EricksonLopez.Mapper.MapIgnoreAttribute
+EricksonLopez.Mapper.MapIgnoreAttribute.DestinationName.get -> string!
+EricksonLopez.Mapper.MapIgnoreAttribute.MapIgnoreAttribute(string! destinationName) -> void
+EricksonLopez.Mapper.MapNullFallbackAttribute
+EricksonLopez.Mapper.MapNullFallbackAttribute.DestinationName.get -> string!
+EricksonLopez.Mapper.MapNullFallbackAttribute.FallbackExpression.get -> string!
+EricksonLopez.Mapper.MapNullFallbackAttribute.MapNullFallbackAttribute(string! destinationName, string! fallbackExpression) -> void
+EricksonLopez.Mapper.MapperAttribute
+EricksonLopez.Mapper.MapperAttribute.MapperAttribute() -> void
+EricksonLopez.Mapper.MapperAttribute.StrictMapping.get -> bool
+EricksonLopez.Mapper.MapperAttribute.StrictMapping.set -> void
+EricksonLopez.Mapper.MapPropertyAttribute
+EricksonLopez.Mapper.MapPropertyAttribute.DestinationName.get -> string!
+EricksonLopez.Mapper.MapPropertyAttribute.MapPropertyAttribute(string! sourceName, string! destinationName) -> void
+EricksonLopez.Mapper.MapPropertyAttribute.SourceName.get -> string!
+EricksonLopez.Mapper.UseConverterAttribute
+EricksonLopez.Mapper.UseConverterAttribute.ConverterType.get -> System.Type!
+EricksonLopez.Mapper.UseConverterAttribute.UseConverterAttribute(System.Type! converterType) -> void
+EricksonLopez.Mapper.MapIgnoreSourceAttribute
+EricksonLopez.Mapper.MapIgnoreSourceAttribute.MapIgnoreSourceAttribute(string! sourceName) -> void
+EricksonLopez.Mapper.MapIgnoreSourceAttribute.SourceName.get -> string!
+EricksonLopez.Mapper.ValueObjectAttribute
+EricksonLopez.Mapper.ValueObjectAttribute.ValueObjectAttribute() -> void
+

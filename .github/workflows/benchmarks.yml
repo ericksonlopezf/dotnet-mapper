@@ -1,0 +1,114 @@
+name: Benchmarks (Baseline Capture)
+
+# ─── Purpose ─────────────────────────────────────────────────────────────────
+# Runs BenchmarkDotNet against the current branch and commits the results
+# to benchmarks/results/ as a permanent markdown/json record.
+#
+# When run on `main`, this establishes the baseline for PR regression checks.
+# When run on a PR branch via workflow_dispatch, allows manual performance comparison.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark-filter:
+        description: "BenchmarkDotNet filter pattern (e.g. *MappingBenchmarks* or *)"
+        required: false
+        default: "*"
+        type: string
+      commit-results:
+        description: "Commit markdown results back to the branch? (true/false)"
+        required: false
+        default: "true"
+        type: string
+  push:
+    branches: [ main ]
+    paths:
+      - "src/**"
+      - "benchmarks/**"
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  benchmark:
+    name: Run Benchmarks (Baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write    # Required to commit results back to the branch
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Setup .NET (multi-version for cross-TFM benchmarks)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore Strong Name key
+        env:
+          SNK_KEY: ${{ secrets.SNK_KEY }}
+        run: |
+          if [ -n "$SNK_KEY" ]; then
+            echo "$SNK_KEY" | tr -d '\n\r ' | base64 --decode > EricksonLopez.Mapper.snk
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore EricksonLopez.Mapper.slnx
+
+      - name: Build (Release)
+        run: dotnet build EricksonLopez.Mapper.slnx --no-restore --configuration Release
+
+      # ─── Run BenchmarkDotNet ─────────────────────────────────────────────
+      # --runtimes net8.0 net9.0 net10.0: runs each benchmark on both .NET 8, 9, and 10
+      # --job short: 3 warmup + 3 measurement iterations for fast CI runs
+      # --exporters json markdown: exports both machine-readable and human-readable results
+      # --artifacts ./benchmarks/results: writes reports directly to the tracked directory
+      - name: Run benchmarks
+        run: >
+          dotnet run
+          --project benchmarks/EricksonLopez.Mapper.Benchmarks/EricksonLopez.Mapper.Benchmarks.csproj
+          --configuration Release
+          --framework net10.0
+          --
+          --filter "${{ inputs.benchmark-filter || '*' }}"
+          --job short
+          --runtimes net8.0 net9.0 net10.0
+          --exporters json markdown
+          --artifacts ./benchmarks/results
+
+      - name: Upload benchmark results as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.run_id }}
+          path: benchmarks/results/
+          retention-days: 90
+
+      # ─── Commit results back to the branch ───────────────────────────────
+      # Commits the markdown results to benchmarks/results/ so they are
+      # tracked in version control and visible without downloading artifacts.
+      - name: Commit benchmark results
+        if: ${{ inputs.commit-results != 'false' && success() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f benchmarks/results/
+          if git diff --staged --quiet; then
+            echo "No benchmark result changes to commit."
+          else
+            git commit -m "chore(benchmarks): update performance baseline [skip ci]
+
+          Run: ${{ github.run_id }}
+          Filter: ${{ inputs.benchmark-filter || '*' }}
+          Trigger: ${{ github.event_name }}"
+            git push origin ${{ github.head_ref || github.ref_name }}
+          fi

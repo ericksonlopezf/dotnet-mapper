@@ -1,0 +1,6 @@
+﻿{
+  Diagnostics: [
+    (17,25): error ELM005: Multiple source properties match destination member 'Name' case-insensitively,
+    (17,25): error ELM001: Destination member 'Name' has no source mapping
+  ]
+}

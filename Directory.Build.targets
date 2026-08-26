@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'EricksonLopez.Mapper.Generator' or '$(MSBuildProjectName)' == 'EricksonLopez.Mapper.Analyzers'">
+    <IncludeSymbols>false</IncludeSymbols>
+    <!-- Source generators and analyzers are compile-time-only tools.
+         Exclude them from Sonar CPD: their code is template-driven and
+         structurally similar across generators by design, not by negligence. -->
+    <SonarQubeExclude>true</SonarQubeExclude>
+  </PropertyGroup>
+</Project>

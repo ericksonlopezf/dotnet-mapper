@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EricksonLopez.Mapper\EricksonLopez.Mapper.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.Mapper.DomainPrimitives\EricksonLopez.Mapper.DomainPrimitives.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.Mapper.Result\EricksonLopez.Mapper.Result.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.Mapper.Mapster\EricksonLopez.Mapper.Mapster.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.Mapper.Generator\EricksonLopez.Mapper.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    <NoWarn>$(NoWarn);ELM016</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Generated\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+</Project>
+
+

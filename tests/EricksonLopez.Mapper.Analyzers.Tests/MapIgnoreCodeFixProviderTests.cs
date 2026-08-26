@@ -1,0 +1,181 @@
+// Copyright © Erickson Lopez. MIT License.
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
+using AwesomeAssertions;
+using EricksonLopez.Mapper.Analyzers;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
+
+using Microsoft.CodeAnalysis.Text;
+using Xunit;
+
+namespace EricksonLopez.Mapper.Analyzers.Tests
+{
+    public static class MapIgnoreCodeFixVerifier
+    {
+        public static DiagnosticResult Diagnostic()
+            => CSharpAnalyzerVerifier<MockELM001Analyzer, DefaultVerifier>.Diagnostic("ELM001");
+
+        public static async Task VerifyCodeFixAsync(string source, DiagnosticResult expected, string fixedSource)
+        {
+            var test = new CSharpCodeFixTest<MockELM001Analyzer, MapIgnoreCodeFixProvider, DefaultVerifier>
+            {
+                TestCode = source,
+                FixedCode = fixedSource,
+                ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+                CompilerDiagnostics = CompilerDiagnostics.None
+            };
+            test.ExpectedDiagnostics.Add(expected);
+            await test.RunAsync();
+        }
+    }
+
+    public class MapIgnoreCodeFixProviderTests
+    {
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenUnmappedMember_ShouldAddMapIgnoreAttribute()
+        {
+            var testCode = @"
+namespace TestNamespace;
+
+public class Source { }
+public class Dest { public int UnmappedProperty { get; set; } }
+
+public partial class MyMapper
+{
+    public partial Dest {|#0:Map|}(Source source);
+}
+";
+
+            var fixedCode = @"
+namespace TestNamespace;
+
+public class Source { }
+public class Dest { public int UnmappedProperty { get; set; } }
+
+public partial class MyMapper
+{
+    [EricksonLopez.Mapper.MapIgnore(""UnmappedProperty"")]
+    public partial Dest Map(Source source);
+}
+";
+            var expected = MapIgnoreCodeFixVerifier.Diagnostic().WithLocation(0).WithArguments("UnmappedProperty");
+            await MapIgnoreCodeFixVerifier.VerifyCodeFixAsync(testCode.Replace("\r\n", "\n").Replace("\n", "\r\n"), expected, fixedCode.Replace("\r\n", "\n").Replace("\n", "\r\n"));
+        }
+
+        [Fact]
+        public void FixableDiagnosticIds_WhenQueried_ShouldContainELM001()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            provider.FixableDiagnosticIds.Should().ContainSingle().Which.Should().Be("ELM001");
+            provider.GetFixAllProvider().Should().Be(WellKnownFixAllProviders.BatchFixer);
+        }
+
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenNodeIsNotMethod_ShouldNotRegisterCodeFix()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public class MyClass { }",
+                descriptor: MockELM001Analyzer.UnmappedMember,
+                span: new TextSpan(25, 7),
+                messageArgs: "UnmappedProperty");
+
+            actions.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenDiagnosticMessageIsMalformed_ShouldNotRegisterCodeFix()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public partial class MyMapper { public partial void Map(); }",
+                descriptor: MockELM001Analyzer.MalformedUnmappedMember,
+                span: new TextSpan(77, 3));
+
+            actions.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenValidDiagnostic_RegistersExpectedCodeAction()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public partial class MyMapper { public partial void Map(); }",
+                descriptor: MockELM001Analyzer.UnmappedMember,
+                span: new TextSpan(77, 3),
+                messageArgs: "UnmappedProperty");
+
+            actions.Should().ContainSingle();
+            actions[0].Title.Should().Be("Add [MapIgnore(\"UnmappedProperty\")]");
+            actions[0].EquivalenceKey.Should().Be("MapIgnore_UnmappedProperty");
+        }
+
+        [Theory]
+        [InlineData("No quotes in message")]
+        [InlineData("Unmapped property 'OnlyOneQuote")]
+        [InlineData("'LeadingQuoteOnly")]
+        [InlineData("a'QuoteAtOneOnly")]
+        public async Task RegisterCodeFixesAsync_WhenDiagnosticMessageHasMalformedQuotes_ShouldNotRegisterCodeFix(string message)
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var customDescriptor = new DiagnosticDescriptor("ELM001", "Title", message, "Category", DiagnosticSeverity.Error, true);
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public partial class MyMapper { public partial void Map(); }",
+                descriptor: customDescriptor,
+                span: new TextSpan(77, 3));
+
+            actions.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenQuoteIsAtIndexOne_ShouldExtractPropertyNameAndRegisterCodeFix()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var customDescriptor = new DiagnosticDescriptor("ELM001", "Title", "a'Prop'b", "Category", DiagnosticSeverity.Error, true);
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public partial class MyMapper { public partial void Map(); }",
+                descriptor: customDescriptor,
+                span: new TextSpan(77, 3));
+
+            actions.Should().ContainSingle();
+            actions[0].Title.Should().Be("Add [MapIgnore(\"Prop\")]");
+        }
+
+        [Fact]
+        public async Task RegisterCodeFixesAsync_WhenDiagnosticNotOnMethod_ShouldNotRegisterCodeFix()
+        {
+            var provider = new MapIgnoreCodeFixProvider();
+            var actions = await CodeFixTestHelper.GetRegisteredCodeActionsAsync(
+                provider,
+                sourceText: "namespace TestNamespace; public partial class MyMapper { private int _field; }",
+                descriptor: MockELM001PropertyAnalyzer.UnmappedMember,
+                span: new TextSpan(68, 6),
+                messageArgs: "UnmappedProperty");
+
+            actions.Should().BeEmpty();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+

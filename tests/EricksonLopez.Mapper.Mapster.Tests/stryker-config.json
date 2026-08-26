@@ -1,0 +1,22 @@
+{
+  "stryker-config": {
+    "project": "EricksonLopez.Mapper.Mapster.csproj",
+    "reporters": [
+      "cleartext",
+      "json"
+    ],
+    "thresholds": {
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "concurrency": 2,
+    "target-framework": "net8.0",
+    "ignore-methods": [
+      "*Log*",
+      "*Metrics*",
+      "*Telemetry*",
+      "ConfigureAwait"
+    ]
+  }
+}
