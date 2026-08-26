@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1](https://github.com/ericksonlopezf/dotnet-mapper/compare/v1.0.0...v1.0.1) (2026-08-26)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** correct AOT smoke test paths, snapshot slashes, and gate triggers ([fb4f7d5](https://github.com/ericksonlopezf/dotnet-mapper/commit/fb4f7d59e1d3749469e2d8bd64093aa97368d452))
+
 ## [Unreleased]
 
 ---
