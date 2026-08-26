@@ -1,0 +1,29 @@
+#nullable enable
+EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategy.ByName = 0 -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategy.ByValue = 1 -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategyAttribute
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.EnumMappingStrategyAttribute(EricksonLopez.Mapper.EnumMappingStrategy strategy) -> void
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.IgnoreCase.get -> bool
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.IgnoreCase.set -> void
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.Strategy.get -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.MapEnumValueAttribute
+EricksonLopez.Mapper.MapEnumValueAttribute.MapEnumValueAttribute(object! source, object! target) -> void
+EricksonLopez.Mapper.MapEnumValueAttribute.Source.get -> object!
+EricksonLopez.Mapper.MapEnumValueAttribute.Target.get -> object!
+EricksonLopez.Mapper.MapperDefaultsAttribute
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumIgnoreCase.get -> bool
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumIgnoreCase.set -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumMappingStrategy.get -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumMappingStrategy.set -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.MapperDefaultsAttribute() -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.StrictMapping.get -> bool
+EricksonLopez.Mapper.MapperDefaultsAttribute.StrictMapping.set -> void
+EricksonLopez.Mapper.MapperIgnoreAttribute
+EricksonLopez.Mapper.MapperIgnoreAttribute.MapperIgnoreAttribute() -> void
+EricksonLopez.Mapper.MapValueAttribute
+EricksonLopez.Mapper.MapValueAttribute.DestinationName.get -> string!
+EricksonLopez.Mapper.MapValueAttribute.MapValueAttribute(string! destinationName, string! valueExpression) -> void
+EricksonLopez.Mapper.MapValueAttribute.ValueExpression.get -> string!
+EricksonLopez.Mapper.UseConverterAttribute.ConverterFieldName.get -> string?
+EricksonLopez.Mapper.UseConverterAttribute.UseConverterAttribute(string! converterFieldName) -> void

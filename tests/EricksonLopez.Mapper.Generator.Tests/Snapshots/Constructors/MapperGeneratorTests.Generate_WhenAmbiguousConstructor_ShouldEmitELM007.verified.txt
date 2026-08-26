@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (21,25): error ELM007: Destination type 'global::TestNamespace.Dest' has multiple parameterized constructors, declare explicitly which constructor to use
+  ]
+}

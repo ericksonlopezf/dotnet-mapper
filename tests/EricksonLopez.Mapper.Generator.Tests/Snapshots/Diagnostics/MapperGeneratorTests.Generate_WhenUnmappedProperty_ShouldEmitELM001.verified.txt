@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (17,25): error ELM001: Destination member 'Unmapped' has no source mapping
+  ]
+}

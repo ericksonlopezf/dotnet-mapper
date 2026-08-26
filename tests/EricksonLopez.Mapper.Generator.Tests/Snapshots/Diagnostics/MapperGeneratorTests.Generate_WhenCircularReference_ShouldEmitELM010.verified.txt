@@ -1,0 +1,5 @@
+﻿{
+  Diagnostics: [
+    (32,22): error ELM010: Circular mapping detected involving method 'Map'. This will cause a StackOverflow at runtime.
+  ]
+}

@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/EricksonLopez.Mapper.Benchmarks/EricksonLopez.Mapper.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/EricksonLopez.Mapper.Abstractions/EricksonLopez.Mapper.Abstractions.csproj" />
+    <Project Path="src/EricksonLopez.Mapper.Analyzers/EricksonLopez.Mapper.Analyzers.csproj" />
+    <Project Path="src/EricksonLopez.Mapper.DomainPrimitives/EricksonLopez.Mapper.DomainPrimitives.csproj" />
+    <Project Path="src/EricksonLopez.Mapper.Generator/EricksonLopez.Mapper.Generator.csproj" />
+    <Project Path="src/EricksonLopez.Mapper.Result/EricksonLopez.Mapper.Result.csproj" />
+    <Project Path="src/EricksonLopez.Mapper.Mapster/EricksonLopez.Mapper.Mapster.csproj" />
+    <Project Path="src/EricksonLopez.Mapper/EricksonLopez.Mapper.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/EricksonLopez.Mapper.Samples/EricksonLopez.Mapper.Samples.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EricksonLopez.Mapper.Analyzers.Tests/EricksonLopez.Mapper.Analyzers.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.DomainPrimitives.Tests/EricksonLopez.Mapper.DomainPrimitives.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.Generator.Tests/EricksonLopez.Mapper.Generator.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.IntegrationTests/EricksonLopez.Mapper.IntegrationTests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.Mapster.Tests/EricksonLopez.Mapper.Mapster.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.Result.Tests/EricksonLopez.Mapper.Result.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.Mapper.Abstractions.Tests/EricksonLopez.Mapper.Abstractions.Tests.csproj" />
+  </Folder>
+</Solution>
