@@ -67,7 +67,7 @@ The solution includes 8 test projects:
 Validate that changes do not introduce reflection or trim warnings under NativeAOT compilation:
 
 ```bash
-dotnet publish tests/EricksonLopez.Mapper.AotTest/EricksonLopez.Mapper.AotTest.csproj \
+dotnet publish tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj \
   --configuration Release \
   --runtime linux-x64 \
   --self-contained \

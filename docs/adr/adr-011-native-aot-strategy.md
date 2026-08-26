@@ -15,7 +15,7 @@ The library is **AOT-safe by design**. All mapping logic is moved to compile tim
 AOT safety is enforced as a hard CI gate via the `aot-smoke-test.yml` workflow:
 
 ```bash
-dotnet publish tests/EricksonLopez.Mapper.AotTest -c Release \
+dotnet publish tests/EricksonLopez.Mapper.AotSmokeTest -c Release \
   -p:PublishAot=true -p:TreatWarningsAsErrors=true
 ```
 

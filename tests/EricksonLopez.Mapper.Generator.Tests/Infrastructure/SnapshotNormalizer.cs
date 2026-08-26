@@ -13,7 +13,7 @@ public static class SnapshotNormalizer
             Diagnostics = diagnostics.Select(d => d.ToString()).ToList(),
             GeneratedSources = generatedTrees.Select(t => new
             {
-                Path = t.FilePath,
+                Path = t.FilePath.Replace("\\", "/"),
                 Source = t.GetText().ToString().Replace("\r\n", "\n").Replace("\r", "\n")
             }).ToList()
         };

@@ -68,12 +68,12 @@ All 8 test projects are included in the `EricksonLopez.Mapper.slnx` solution:
 |---|---|---|---|
 | **CI** | `ci.yml` | `push`/`PR` → `main`, `develop` | CI orchestrator invoking reusable build-test and AOT smoke test |
 | **Reusable Build & Test** | `dotnet-build-test.yml` | `workflow_call` | Restores, builds, executes tests, collects Coverlet coverage, and runs SonarCloud scanner |
-| **NativeAOT Smoke Test** | `aot-smoke-test.yml` | `push`/`PR`, `workflow_call`, `workflow_dispatch` | Compiles and executes `AotTest` with `PublishAot=true` on Linux (clang/lld/zlib) |
+| **NativeAOT Smoke Test** | `aot-smoke-test.yml` | `workflow_call`, `workflow_dispatch` | Compiles and executes `AotSmokeTest` with `PublishAot=true` on Linux (clang/lld/zlib) |
 | **Publish NuGet** | `publish.yml` | `push v*.*.*` tag, `workflow_dispatch` | Builds, tests, packs 7 packages, attests Sigstore provenance, pushes via OIDC to NuGet.org, and creates GitHub Release |
 | **Release Please** | `release-please.yml` | `push` → `main` | Analyzes Conventional Commits, maintains `CHANGELOG.md` and versioning, and triggers `publish.yml` upon release PR merge |
 | **Mutation Testing** | `mutation-testing.yml` | Schedule Mon 04:00 UTC, `workflow_dispatch` | Stryker.NET parallel matrix across **7 packages** (Core, Abstractions, Generator, Analyzers, Result, DomainPrimitives, Mapster) |
 | **Benchmark Regression Gate** | `benchmark-regression-gate.yml` | PR → `main`, `develop` | Runs BenchmarkDotNet and fails if regression exceeds threshold (default: 10%) |
-| **Benchmarks Baseline** | `benchmarks.yml` | `push` → `main`, `workflow_dispatch` | Captures baseline performance metrics and commits markdown/json results to `benchmarks/results/` |
+| **Benchmarks Baseline** | `benchmarks.yml` | `workflow_dispatch` | Captures baseline performance metrics and commits markdown/json results to `benchmarks/results/` |
 | **Weekly Deep Benchmarks** | `weekly-benchmarks.yml` | Schedule Sun 02:00 UTC, `workflow_dispatch` | Multi-TFM deep benchmark evaluation across .NET 8, 9, and 10 |
 
 ### CI/CD Secrets

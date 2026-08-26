@@ -19,9 +19,6 @@ name: Mutation Testing (Stryker)
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       mutation-level:
@@ -229,7 +226,7 @@ jobs:
             console.log(`Overall Status   : ${statusLabel}`);
             console.log(`Passed Gate      : ${allPassed}`);
 
-            // Append Consolidated Summary Table to Step Summary
+            const targetSha = context.sha;
             const execDate = new Date().toISOString();
             let md = `\n# 🛡️ Consolidated Stryker Mutation Testing Gate\n\n`;
             md += `| Metric | Value |\n`;
@@ -258,7 +255,6 @@ jobs:
             }
 
             // Post GitHub Commit Status
-            const targetSha = context.sha;
             const state = allPassed ? 'success' : 'failure';
             const description = `Score: ${overallScore}% (${packages.filter(p => p.passed_break || p.passed).length}/${packages.length} packages >= ${breakThreshold}%) - ${statusLabel}`;
 

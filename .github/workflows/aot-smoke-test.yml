@@ -24,10 +24,6 @@ on:
       SNK_KEY:
         description: "Base64-encoded Strong Name key (.snk) for assembly signing"
         required: false
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_dispatch:
 
 env:
@@ -77,7 +73,7 @@ jobs:
       - name: Publish AotSmokeTest (NativeAOT)
         run: >
           dotnet publish
-          tests/EricksonLopez.Mapper.AotTest/EricksonLopez.Mapper.AotTest.csproj
+          tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj
           --configuration Release
           --runtime linux-x64
           --self-contained
@@ -92,8 +88,8 @@ jobs:
       # smoke-test assertions. A non-zero exit code from the binary fails this step.
       - name: Run NativeAOT binary
         run: |
-          chmod +x ./aot-output/EricksonLopez.Mapper.AotTest
-          ./aot-output/EricksonLopez.Mapper.AotTest
+          chmod +x ./aot-output/EricksonLopez.Mapper.AotSmokeTest
+          ./aot-output/EricksonLopez.Mapper.AotSmokeTest
           echo "Exit code: $?"
 
       # ─── Upload binary for debugging if needed ────────────────────────────

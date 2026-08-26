@@ -21,11 +21,6 @@ on:
         required: false
         default: "true"
         type: string
-  push:
-    branches: [ main ]
-    paths:
-      - "src/**"
-      - "benchmarks/**"
 
 env:
   DOTNET_NOLOGO: true
@@ -73,17 +68,18 @@ jobs:
       # --exporters json markdown: exports both machine-readable and human-readable results
       # --artifacts ./benchmarks/results: writes reports directly to the tracked directory
       - name: Run benchmarks
-        run: >
-          dotnet run
-          --project benchmarks/EricksonLopez.Mapper.Benchmarks/EricksonLopez.Mapper.Benchmarks.csproj
-          --configuration Release
-          --framework net10.0
-          --
-          --filter "${{ inputs.benchmark-filter || '*' }}"
-          --job short
-          --runtimes net8.0 net9.0 net10.0
-          --exporters json markdown
-          --artifacts ./benchmarks/results
+        run: |
+          mkdir -p benchmarks/results
+          dotnet run \
+            --project benchmarks/EricksonLopez.Mapper.Benchmarks/EricksonLopez.Mapper.Benchmarks.csproj \
+            --configuration Release \
+            --framework net10.0 \
+            -- \
+            --filter "${{ inputs.benchmark-filter || '*' }}" \
+            --job short \
+            --runtimes net8.0 net9.0 net10.0 \
+            --exporters json markdown \
+            --artifacts ./benchmarks/results
 
       - name: Upload benchmark results as artifact
         if: always()
@@ -99,6 +95,7 @@ jobs:
       - name: Commit benchmark results
         if: ${{ inputs.commit-results != 'false' && success() }}
         run: |
+          mkdir -p benchmarks/results
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f benchmarks/results/

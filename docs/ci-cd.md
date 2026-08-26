@@ -10,7 +10,7 @@ The `EricksonLopez.Mapper` repository employs an automated GitHub Actions DevOps
 |---|---|---|---|
 | **CI Orchestrator** | `ci.yml` | `push`/`PR` → `main`, `develop` | Orchestrates parallel execution of `dotnet-build-test.yml` and `aot-smoke-test.yml`. |
 | **Reusable Build & Test** | `dotnet-build-test.yml` | `workflow_call` | Reusable workflow: restores, builds, runs test suites, collects Coverlet coverage, and runs SonarCloud analysis. |
-| **NativeAOT Smoke Test** | `aot-smoke-test.yml` | `push`/`PR`, `workflow_call`, `workflow_dispatch` | Compiles and executes `AotTest` under Linux using NativeAOT (`PublishAot=true`). |
+| **NativeAOT Smoke Test** | `aot-smoke-test.yml` | `workflow_call`, `workflow_dispatch` | Compiles and executes `AotSmokeTest` under Linux using NativeAOT (`PublishAot=true`). |
 | **Publish NuGet** | `publish.yml` | `push v*.*.*` tag, `workflow_dispatch` | Builds, tests, packs 7 packages, attests Sigstore provenance, publishes to NuGet.org via OIDC, and creates GitHub Release. |
 | **Release Please** | `release-please.yml` | `push` → `main` | Parses Conventional Commits, creates release PRs, tags releases, and dispatches `publish.yml`. |
 | **Mutation Testing** | `mutation-testing.yml` | Schedule Mon 04:00 UTC, `workflow_dispatch` | Runs Stryker.NET in a parallel matrix across **7 packages**: Core, Abstractions, Analyzers, DomainPrimitives, Generator, Mapster, Result. |
@@ -100,10 +100,10 @@ flowchart LR
 
 This workflow validates that `IsAotCompatible=true` is physically enforced:
 - **Runner**: `ubuntu-latest` with native prerequisites (`clang`, `lld`, `zlib1g-dev`).
-- **SDK Version**: `8.0.x` — intentionally pinned to validate `net8.0` TFM backward-compatibility. The AotTest project targets `net8.0`, `net9.0`, and `net10.0`; the `8.0.x` SDK is sufficient and produces the fastest CI feedback for the lowest LTS baseline.
+- **SDK Version**: `8.0.x` — intentionally pinned to validate `net8.0` TFM backward-compatibility. The AotSmokeTest project targets `net8.0`, `net9.0`, and `net10.0`; the `8.0.x` SDK is sufficient and produces the fastest CI feedback for the lowest LTS baseline.
 - **Publish Configuration**:
   ```bash
-  dotnet publish tests/EricksonLopez.Mapper.AotTest/EricksonLopez.Mapper.AotTest.csproj \
+  dotnet publish tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj \
     --configuration Release \
     --runtime linux-x64 \
     --self-contained \
@@ -112,7 +112,7 @@ This workflow validates that `IsAotCompatible=true` is physically enforced:
     --output ./aot-output
   ```
 - **Hard Gate**: `DOTNET_EnableAotCompilationWarningsAsErrors=true` ensures any `IL2026` (RequiresUnreferencedCode) or `IL3050` (RequiresDynamicCode) trim warning fails the build.
-- **Execution**: The resulting native Linux ELF binary `./aot-output/EricksonLopez.Mapper.AotTest` is executed directly to verify zero runtime initialization faults.
+- **Execution**: The resulting native Linux ELF binary `./aot-output/EricksonLopez.Mapper.AotSmokeTest` is executed directly to verify zero runtime initialization faults.
 
 ---
 

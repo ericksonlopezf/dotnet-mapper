@@ -90,7 +90,7 @@ Collected via `coverlet.collector` (XPlat Code Coverage) across all test runs:
 Enforced by `aot-smoke-test.yml` on every PR and commit to `main`/`develop`:
 
 ```bash
-dotnet publish tests/EricksonLopez.Mapper.AotTest/EricksonLopez.Mapper.AotTest.csproj \
+dotnet publish tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj \
   --configuration Release \
   --runtime linux-x64 \
   --self-contained \
