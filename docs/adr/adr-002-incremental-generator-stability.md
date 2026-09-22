@@ -1,5 +1,11 @@
 # ADR-002: Incremental Generator Stability and Modular Architecture
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13 (Updated 2026-08-15)
 **Deciders**: EricksonLopez.Mapper Architecture Team

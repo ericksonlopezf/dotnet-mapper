@@ -122,6 +122,8 @@ All diagnostics are categorized into generator errors/warnings and analyzer rule
 | **`ELM014`** | Error / Warn | Unmapped Enum Member | Target enum lacks a member present in source enum under strict mapping. |
 | **`ELM015`** | Warning | Narrowing Numeric Conversion | Narrowing cast (e.g. `long` → `int`) may cause data truncation. |
 | **`ELM016`** | Warning | String to Enum Risk | String-to-enum parsing carries unvalidated runtime parse risks. |
+| **`ELM017`** | Error | Factory Method Not Found | Factory method specified in `[MapFactory]` was not found on destination type. |
+| **`ELM018`** | Warning | Duplicate MapProperty Target | Destination member is targeted by duplicate `[MapProperty]` declarations. |
 
 ### Analyzer Diagnostics (IDE & CI Gate)
 

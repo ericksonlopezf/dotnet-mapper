@@ -99,14 +99,14 @@ public partial class UserMapper
     /// </summary>
     /// <param name="source">The user source to map from.</param>
     /// <returns>A new <see cref="UserEntity"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapFactory("Create")]
     public partial UserEntity MapToEntity(UserSource source);
 
     /// <summary>Maps an <see cref="AddressSource"/> to an <see cref="AddressValueObject"/>.</summary>
     /// <param name="source">The address source to map from.</param>
     /// <returns>A new <see cref="AddressValueObject"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial AddressValueObject MapAddress(AddressSource source);
 }
 
@@ -182,20 +182,20 @@ public partial class ComplexMapper
     /// </summary>
     /// <param name="source">The animal source to map from.</param>
     /// <returns>A <see cref="DogDest"/> when <paramref name="source"/> is a <see cref="DogSource"/>.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapDerivedType(typeof(DogSource), typeof(DogDest))]
     public partial AnimalDest MapAnimal(AnimalSource source);
 
     /// <summary>Maps a <see cref="DogSource"/> to a <see cref="DogDest"/>.</summary>
     /// <param name="source">The dog source to map from.</param>
     /// <returns>A new <see cref="DogDest"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial DogDest MapDog(DogSource source);
 
     /// <summary>Converts a <see cref="CustomDate"/> to a <see cref="CustomString"/> formatted as <c>YYYY-MM-DD</c>.</summary>
     /// <param name="source">The date to convert.</param>
     /// <returns>A <see cref="CustomString"/> with the ISO-formatted date.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [UseConverter(typeof(DateStringConverter))]
     public partial CustomString MapDate(CustomDate source);
 }

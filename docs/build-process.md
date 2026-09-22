@@ -10,7 +10,7 @@ This document details the local build instructions, test execution commands, mut
 flowchart LR
     A[dotnet restore] --> B[dotnet build -c Release]
     B --> C[dotnet test -c Release]
-    C --> D[pwsh ./run-stryker.ps1]
+    C --> D[pwsh ./scripts/run-stryker.ps1]
     D --> E[dotnet run Benchmarks]
     E --> F[dotnet pack -c Release]
 ```
@@ -37,7 +37,7 @@ Compile the entire solution in `Release` configuration:
 dotnet build EricksonLopez.Mapper.slnx -c Release
 ```
 
-`Directory.Build.props` enforces `WarningsAsErrors=true`, `Nullable=enable`, `LangVersion=preview`, `IsAotCompatible=true`, and `IsTrimmable=true`. Building the solution triggers the source generator to emit mapping code across test, benchmark, and sample projects.
+`Directory.Build.props` enforces `WarningsAsErrors=true`, `Nullable=enable`, `LangVersion=14`, `IsAotCompatible=true`, and `IsTrimmable=true`. Building the solution triggers the source generator to emit mapping code across test, benchmark, and sample projects.
 
 ### Step 3: Run Full Test Suite
 
@@ -70,7 +70,7 @@ dotnet tool restore
 dotnet stryker --config-file stryker-generator-config.json
 
 # Or run the multi-project mutation test suite via PowerShell
-pwsh ./run-stryker.ps1
+pwsh ./scripts/run-stryker.ps1
 ```
 
 > **Config file location:** All 7 Stryker configuration files (`stryker-config.json`, `stryker-abstractions-config.json`, etc.) reside at the **repository root**, not inside `src/` project directories.
@@ -104,4 +104,4 @@ This produces `.nupkg` and `.snupkg` symbol packages for:
 
 ## 3. Automated CI/CD Pipeline
 
-For full documentation on the 9 automated GitHub Actions workflows, refer to [ci-cd.md](ci-cd.md).
+For full documentation on the 10 automated GitHub Actions workflows, refer to [ci-cd.md](ci-cd.md).

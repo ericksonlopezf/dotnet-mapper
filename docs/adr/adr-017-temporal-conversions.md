@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 .NET modern temporal types (`DateOnly`, `TimeOnly`, `DateTime`, `DateTimeOffset`) frequently interact in modern applications. Legacy databases or external APIs often provide `DateTime` or `DateTimeOffset`, while domain models prefer modern `DateOnly` and `TimeOnly` primitives.
 

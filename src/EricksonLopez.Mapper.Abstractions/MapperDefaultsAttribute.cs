@@ -10,7 +10,7 @@ namespace EricksonLopez.Mapper;
 public sealed class MapperDefaultsAttribute : Attribute
 {
     /// <summary>
-    /// Gets or sets the default strategy used for enum conversions across the assembly.
+    /// Gets or sets the default strategy applied during enum conversions across the assembly.
     /// </summary>
     public EnumMappingStrategy EnumMappingStrategy { get; set; } = EnumMappingStrategy.ByName;
 

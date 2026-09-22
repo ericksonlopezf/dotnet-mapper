@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 In enterprise-grade .NET software engineering and Continuous Integration / Continuous Deployment (CI/CD) environments, automated test suites serve two foundational, interdependent objectives:
 

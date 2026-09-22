@@ -1,7 +1,10 @@
 # ADR-D03: Automatic Flattening Convention Rejected (Explicit Deep Path Navigation Supported)
 
-**Status**: Accepted  
-**Date**: 2026-08-13 (Updated: 2026-08-19)
+## Status
+Rejected (Feature Permanently Excluded)
+
+## Date
+2026-08-13 (Updated: 2026-08-19)
 
 ## Decision
 

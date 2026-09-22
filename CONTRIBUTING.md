@@ -31,7 +31,7 @@ Build the complete solution using `Release` configuration:
 dotnet build EricksonLopez.Mapper.slnx -c Release
 ```
 
-> **Global Compiler Settings:** `Directory.Build.props` centrally enforces `Nullable=enable`, `TreatWarningsAsErrors=true`, `WarningsAsErrors=true`, `LangVersion=preview`, `IsAotCompatible=true`, and `IsTrimmable=true`.
+> **Global Compiler Settings:** `Directory.Build.props` centrally enforces `Nullable=enable`, `TreatWarningsAsErrors=true`, `WarningsAsErrors=true`, `LangVersion=14`, `IsAotCompatible=true`, and `IsTrimmable=true`.
 
 ---
 
@@ -89,7 +89,7 @@ dotnet stryker --config-file stryker-config.json              # Core
 dotnet stryker --config-file stryker-abstractions-config.json # Abstractions
 
 # Or execute the complete multi-project mutation test suite via PowerShell
-pwsh ./run-stryker.ps1
+pwsh ./scripts/run-stryker.ps1
 ```
 
 **Mutation Thresholds** (configured in each `stryker-*.json` at repository root):

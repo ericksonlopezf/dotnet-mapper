@@ -10,7 +10,7 @@
       "low": 98,
       "break": 95
     },
-    "concurrency": 4,
+    "concurrency": 2,
     "coverage-analysis": "off",
     "target-framework": "net8.0",
     "ignore-methods": [

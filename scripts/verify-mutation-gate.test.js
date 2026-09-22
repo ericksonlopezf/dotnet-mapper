@@ -8,399 +8,304 @@ const {
   MAX_REPORT_AGE_DAYS
 } = require('./verify-mutation-gate');
 
-console.log('Running tests for verify-mutation-gate.js...\n');
+console.log('Running tests for verify-mutation-gate.js (4 Invariant Conditions)...\n');
 
-// Test 1: loadThresholds from stryker-config.json
-{
-  const thresholds = loadThresholds();
-  assert.strictEqual(thresholds.high, 100, 'Threshold high should be 100');
-  assert.strictEqual(thresholds.low, 98, 'Threshold low should be 98');
-  assert.strictEqual(thresholds.break, 95, 'Threshold break should be 95');
-  console.log('✅ Test 1 Passed: loadThresholds loads correct values from stryker-config.json');
-}
+const describe = (name, fn) => fn();
+const it = (name, fn) => fn();
 
-// Test 2: parseScoreFromDescription
-{
-  assert.strictEqual(parseScoreFromDescription('Stryker: 100% (240/240 killed) - ✅ HIGH'), 100);
-  assert.strictEqual(parseScoreFromDescription('Stryker: 98.5% (200/203 killed) - 🟡 LOW'), 98.5);
-  assert.strictEqual(parseScoreFromDescription('Stryker: 95.0% - 🟠 WARNING'), 95.0);
-  assert.strictEqual(parseScoreFromDescription('Stryker: 94.2% - ❌ FAILED'), 94.2);
-  assert.strictEqual(parseScoreFromDescription(null), null);
-  assert.strictEqual(parseScoreFromDescription('No percentage here'), null);
-  console.log('✅ Test 2 Passed: parseScoreFromDescription correctly extracts numeric percentage');
-}
+describe('verify-mutation-gate unit tests', () => {
+  // Test 1: loadThresholds from stryker-config.json
+  it('loadThresholds loads correct values from stryker-config.json', () => {
+    const thresholds = loadThresholds();
+    assert.strictEqual(thresholds.high, 100, 'Threshold high should be 100');
+    assert.strictEqual(thresholds.low, 98, 'Threshold low should be 98');
+    assert.strictEqual(thresholds.break, 95, 'Threshold break should be 95');
+    console.log('✅ Test 1 Passed: loadThresholds loads correct values from stryker-config.json');
+  });
 
-// Test 3: evaluateScore
-{
-  const thresholds = { high: 100, low: 98, break: 95 };
+  // Test 2: parseScoreFromDescription
+  it('parseScoreFromDescription correctly extracts numeric percentage', () => {
+    assert.strictEqual(parseScoreFromDescription('Stryker: 100% (240/240 killed) - ✅ HIGH'), 100);
+    assert.strictEqual(parseScoreFromDescription('Stryker: 98.5% (200/203 killed) - 🟡 LOW'), 98.5);
+    assert.strictEqual(parseScoreFromDescription('Stryker: 95.0% - 🟠 WARNING'), 95.0);
+    assert.strictEqual(parseScoreFromDescription('Stryker: 94.2% - ❌ FAILED'), 94.2);
+    assert.strictEqual(parseScoreFromDescription(null), null);
+    assert.strictEqual(parseScoreFromDescription('No percentage here'), null);
+    console.log('✅ Test 2 Passed: parseScoreFromDescription correctly extracts numeric percentage');
+  });
 
-  const resHigh = evaluateScore(100, thresholds);
-  assert.strictEqual(resHigh.status, '✅ HIGH');
-  assert.strictEqual(resHigh.passedBreak, true);
+  // Test 3: evaluateScore
+  it('evaluateScore correctly categorizes scores and break gate', () => {
+    const thresholds = { high: 100, low: 98, break: 95 };
 
-  const resLow = evaluateScore(98.5, thresholds);
-  assert.strictEqual(resLow.status, '🟡 LOW');
-  assert.strictEqual(resLow.passedBreak, true);
+    const resHigh = evaluateScore(100, thresholds);
+    assert.strictEqual(resHigh.status, '✅ HIGH');
+    assert.strictEqual(resHigh.passedBreak, true);
 
-  const resWarn = evaluateScore(96.0, thresholds);
-  assert.strictEqual(resWarn.status, '🟠 WARNING');
-  assert.strictEqual(resWarn.passedBreak, true);
+    const resLow = evaluateScore(98.5, thresholds);
+    assert.strictEqual(resLow.status, '🟡 LOW');
+    assert.strictEqual(resLow.passedBreak, true);
 
-  const resBreakExact = evaluateScore(95.0, thresholds);
-  assert.strictEqual(resBreakExact.status, '🟠 WARNING');
-  assert.strictEqual(resBreakExact.passedBreak, true);
+    const resWarn = evaluateScore(96.0, thresholds);
+    assert.strictEqual(resWarn.status, '🟠 WARNING');
+    assert.strictEqual(resWarn.passedBreak, true);
 
-  const resFail = evaluateScore(94.9, thresholds);
-  assert.strictEqual(resFail.status, '❌ FAILED');
-  assert.strictEqual(resFail.passedBreak, false);
+    const resBreakExact = evaluateScore(95.0, thresholds);
+    assert.strictEqual(resBreakExact.status, '🟠 WARNING');
+    assert.strictEqual(resBreakExact.passedBreak, true);
 
-  console.log('✅ Test 3 Passed: evaluateScore correctly categorizes scores and break gate');
-}
+    const resFail = evaluateScore(94.9, thresholds);
+    assert.strictEqual(resFail.status, '❌ FAILED');
+    assert.strictEqual(resFail.passedBreak, false);
 
-// Test 4: verifyMutationGate with mock direct target SHA
+    console.log('✅ Test 3 Passed: evaluateScore correctly categorizes scores and break gate');
+  });
+});
+
 (async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'abc1234567890'
-  };
+  // Test 4: verifyMutationGate with valid fresh evidence on main
+  {
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'fresh1234567890'
+    };
 
-  const freshDate = new Date().toISOString();
+    const freshDate = new Date().toISOString();
 
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async ({ ref }) => {
-          if (ref === 'abc1234567890') {
-            return {
-              data: {
-                statuses: [
-                  {
-                    context: 'mutation-testing/stryker',
-                    state: 'success',
-                    description: 'Stryker: 100% (240/240 killed) - ✅ HIGH',
-                    updated_at: freshDate,
-                    target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12345'
-                  }
-                ]
-              }
-            };
+    const mockGithub = {
+      rest: {
+        repos: {
+          listCommits: async () => ({
+            data: [{ sha: 'fresh1234567890' }]
+          }),
+          getCombinedStatusForRef: async ({ ref }) => {
+            if (ref === 'fresh1234567890') {
+              return {
+                data: {
+                  statuses: [
+                    {
+                      context: 'mutation-testing/stryker',
+                      state: 'success',
+                      description: 'Score: 100.0% (8/8 packages >= 95%) - ✅ HIGH',
+                      updated_at: freshDate,
+                      target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12345'
+                    }
+                  ]
+                }
+              };
+            }
+            return { data: { statuses: [] } };
           }
-          return { data: { statuses: [] } };
         }
       }
-    }
-  };
+    };
 
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
 
-  await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-  assert.strictEqual(failed, false, 'Should pass for 100% score on target commit');
-  console.log('✅ Test 4 Passed: verifyMutationGate succeeds with direct 100% commit status');
-})();
+    const res = await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, false, 'Should not need Stryker when valid evidence exists');
+    assert.strictEqual(res.canProceed, true, 'Should allow publication without re-running Stryker');
+    assert.strictEqual(outputs.needs_stryker, 'false');
+    assert.strictEqual(outputs.can_proceed, 'true');
+    console.log('✅ Test 4 Passed: verifyMutationGate reuses valid fresh Stryker evidence on main');
+  }
 
-// Test 5: verifyMutationGate with score below break threshold
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'fail1234567890'
-  };
+  // Test 5: Condition 1 - No prior run on main -> needs_stryker = true
+  {
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'notfound123'
+    };
 
-  const freshDate = new Date().toISOString();
+    const mockGithub = {
+      rest: {
+        repos: {
+          listCommits: async () => ({ data: [] }),
+        },
+        actions: {
+          listWorkflowRuns: async () => ({ data: { workflow_runs: [] } })
+        }
+      }
+    };
 
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async () => {
-          return {
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
+
+    const res = await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, true, 'Condition 1: Must trigger Stryker when no evidence is found');
+    assert.strictEqual(res.canProceed, false);
+    assert.strictEqual(outputs.needs_stryker, 'true');
+    assert.strictEqual(outputs.can_proceed, 'false');
+    console.log('✅ Test 5 Passed: Condition 1 (No Prior Run) triggers needs_stryker');
+  }
+
+  // Test 6: Condition 2 - Expired report (> 7 days TTL) -> needs_stryker = true
+  {
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'expired123'
+    };
+
+    // 26 days old (incident scenario)
+    const oldDate = new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString();
+
+    const mockGithub = {
+      rest: {
+        repos: {
+          listCommits: async () => ({
+            data: [{ sha: 'expired123' }]
+          }),
+          getCombinedStatusForRef: async () => ({
+            data: {
+              statuses: [
+                {
+                  context: 'mutation-testing/stryker',
+                  state: 'success',
+                  description: 'Score: 100.0% - ✅ HIGH',
+                  updated_at: oldDate,
+                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/999'
+                }
+              ]
+            }
+          })
+        }
+      }
+    };
+
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
+
+    const res = await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, true, 'Condition 2: Expired report must trigger Stryker');
+    assert.strictEqual(res.canProceed, false);
+    assert.strictEqual(outputs.needs_stryker, 'true');
+    assert.strictEqual(outputs.can_proceed, 'false');
+    console.log('✅ Test 6 Passed: Condition 2 (TTL Expired) triggers needs_stryker');
+  }
+
+  // Test 7: Condition 3 - Production code drift in src/ -> needs_stryker = true
+  {
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'targetSha789'
+    };
+
+    const freshDate = new Date().toISOString();
+
+    const mockGithub = {
+      rest: {
+        repos: {
+          listCommits: async () => ({
+            data: [{ sha: 'baseSha123' }]
+          }),
+          getCombinedStatusForRef: async () => ({
+            data: {
+              statuses: [
+                {
+                  context: 'mutation-testing/stryker',
+                  state: 'success',
+                  description: 'Score: 100.0% - ✅ HIGH',
+                  updated_at: freshDate,
+                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/1000'
+                }
+              ]
+            }
+          }),
+          compareCommits: async () => ({
+            data: {
+              files: [
+                { filename: 'src/EricksonLopez.SharedKernel/Domain/Entity.cs' },
+                { filename: 'README.md' }
+              ]
+            }
+          })
+        }
+      }
+    };
+
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
+
+    const res = await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, true, 'Condition 3: Code drift in src/ must trigger Stryker');
+    assert.strictEqual(res.canProceed, false);
+    assert.strictEqual(outputs.needs_stryker, 'true');
+    console.log('✅ Test 7 Passed: Condition 3 (Production Code Drift) triggers needs_stryker');
+  }
+
+  // Test 8: Condition 4 - Prior run below break threshold (< 95%) -> needs_stryker = true
+  {
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'failedScore123'
+    };
+
+    const freshDate = new Date().toISOString();
+
+    const mockGithub = {
+      rest: {
+        repos: {
+          listCommits: async () => ({
+            data: [{ sha: 'failedScore123' }]
+          }),
+          getCombinedStatusForRef: async () => ({
             data: {
               statuses: [
                 {
                   context: 'mutation-testing/stryker',
                   state: 'failure',
-                  description: 'Stryker: 80.0% (160/200 killed) - ❌ FAILED',
+                  description: 'Score: 92.4% (< 95%) - ❌ FAILED',
                   updated_at: freshDate,
-                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12346'
+                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/1001'
                 }
               ]
             }
-          };
+          })
         }
       }
-    }
-  };
+    };
 
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
 
-  try {
-    await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-    assert.fail('Should have thrown an error for score below break threshold');
-  } catch (err) {
-    assert.strictEqual(failed, true, 'core.setFailed should be called');
-    console.log('✅ Test 5 Passed: verifyMutationGate blocks release for sub-break score');
+    const res = await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, true, 'Condition 4: Failed threshold must trigger Stryker');
+    assert.strictEqual(res.canProceed, false);
+    assert.strictEqual(outputs.needs_stryker, 'true');
+    console.log('✅ Test 8 Passed: Condition 4 (Score Regression / Gate Failure) triggers needs_stryker');
   }
-})();
 
-// Test 6: verifyMutationGate with score in WARNING range (96%) - Must PASS release gate
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'warn1234567890'
-  };
+  // Test 9: skip_mutation_gate emergency bypass
+  {
+    process.env.SKIP_MUTATION_GATE = 'true';
+    const mockContext = {
+      repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
+      sha: 'bypass123'
+    };
 
-  const freshDate = new Date().toISOString();
+    const outputs = {};
+    const mockCore = {
+      setOutput: (k, v) => { outputs[k] = v; }
+    };
 
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async () => {
-          return {
-            data: {
-              statuses: [
-                {
-                  context: 'mutation-testing/stryker',
-                  state: 'success',
-                  description: 'Score: 96.20% (7/7 packages >= 95%) - 🟠 WARNING',
-                  updated_at: freshDate,
-                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12347'
-                }
-              ]
-            }
-          };
-        }
-      }
-    }
-  };
-
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
-
-  await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-  assert.strictEqual(failed, false, 'Score >= 95% in WARNING band must pass release gate');
-  console.log('✅ Test 6 Passed: verifyMutationGate allows release for WARNING score (96.2%)');
-})();
-
-// Test 7: verifyMutationGate with score in LOW range (98.5%) - Must PASS release gate
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'low1234567890'
-  };
-
-  const freshDate = new Date().toISOString();
-
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async () => {
-          return {
-            data: {
-              statuses: [
-                {
-                  context: 'mutation-testing/stryker',
-                  state: 'success',
-                  description: 'Score: 98.50% (7/7 packages >= 95%) - 🟡 LOW',
-                  updated_at: freshDate,
-                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12348'
-                }
-              ]
-            }
-          };
-        }
-      }
-    }
-  };
-
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
-
-  await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-  assert.strictEqual(failed, false, 'Score >= 98% in LOW band must pass release gate');
-  console.log('✅ Test 7 Passed: verifyMutationGate allows release for LOW score (98.5%)');
-})();
-
-// Test 8: verifyMutationGate with expired report (> 7 days) - Must FAIL release gate
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'expired1234567890'
-  };
-
-  const oldDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(); // 10 days ago
-
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async () => {
-          return {
-            data: {
-              statuses: [
-                {
-                  context: 'mutation-testing/stryker',
-                  state: 'success',
-                  description: 'Score: 100% - ✅ HIGH',
-                  updated_at: oldDate,
-                  target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12349'
-                }
-              ]
-            }
-          };
-        }
-      }
-    }
-  };
-
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
-
-  try {
-    await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-    assert.fail('Should have thrown an error for expired report');
-  } catch (err) {
-    assert.strictEqual(failed, true, 'core.setFailed should be called for expired report');
-    console.log('✅ Test 8 Passed: verifyMutationGate blocks release for expired report (> 7 days)');
+    const res = await verifyMutationGate({ github: {}, context: mockContext, core: mockCore });
+    assert.strictEqual(res.needsStryker, false);
+    assert.strictEqual(res.canProceed, true);
+    assert.strictEqual(res.bypassed, true);
+    delete process.env.SKIP_MUTATION_GATE;
+    console.log('✅ Test 9 Passed: skip_mutation_gate bypass functions correctly');
   }
-})();
 
-// Test 9: verifyMutationGate with production code drift in src/ - Must FAIL release gate
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'tagCommitSha999'
-  };
-
-  const freshDate = new Date().toISOString();
-
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async ({ ref }) => {
-          if (ref === 'tagCommitSha999') {
-            return { data: { statuses: [] } };
-          }
-          if (ref === 'mainCommitSha888') {
-            return {
-              data: {
-                statuses: [
-                  {
-                    context: 'mutation-testing/stryker',
-                    state: 'success',
-                    description: 'Score: 100% - ✅ HIGH',
-                    updated_at: freshDate,
-                    target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12350'
-                  }
-                ]
-              }
-            };
-          }
-          return { data: { statuses: [] } };
-        },
-        listCommits: async () => {
-          return {
-            data: [
-              { sha: 'mainCommitSha888', commit: { committer: { date: freshDate } } }
-            ]
-          };
-        },
-        compareCommits: async ({ base, head }) => {
-          return {
-            data: {
-              files: [
-                { filename: 'src/EricksonLopez.Mapper/Mapper.cs' },
-                { filename: 'README.md' }
-              ]
-            }
-          };
-        }
-      }
-    }
-  };
-
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
-
-  try {
-    await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-    assert.fail('Should have thrown an error for code drift in src/');
-  } catch (err) {
-    assert.strictEqual(failed, true, 'core.setFailed should be called when src/ has drifted');
-    console.log('✅ Test 9 Passed: verifyMutationGate blocks release when src/ code drift is detected');
-  }
-})();
-
-// Test 10: verifyMutationGate fallback to main commit without src drift - Must PASS release gate
-(async () => {
-  let failed = false;
-  const mockContext = {
-    repo: { owner: 'ericksonlopezf', repo: 'dotnet-mapper' },
-    sha: 'tagCommitSha111'
-  };
-
-  const freshDate = new Date().toISOString();
-
-  const mockGithub = {
-    rest: {
-      repos: {
-        getCombinedStatusForRef: async ({ ref }) => {
-          if (ref === 'tagCommitSha111') {
-            return { data: { statuses: [] } };
-          }
-          if (ref === 'mainCommitSha222') {
-            return {
-              data: {
-                statuses: [
-                  {
-                    context: 'mutation-testing/stryker',
-                    state: 'success',
-                    description: 'Score: 100% - ✅ HIGH',
-                    updated_at: freshDate,
-                    target_url: 'https://github.com/ericksonlopezf/dotnet-mapper/actions/runs/12351'
-                  }
-                ]
-              }
-            };
-          }
-          return { data: { statuses: [] } };
-        },
-        listCommits: async () => {
-          return {
-            data: [
-              { sha: 'mainCommitSha222', commit: { committer: { date: freshDate } } }
-            ]
-          };
-        },
-        compareCommits: async ({ base, head }) => {
-          return {
-            data: {
-              files: [
-                { filename: 'Directory.Build.props' },
-                { filename: 'CHANGELOG.md' }
-              ]
-            }
-          };
-        }
-      }
-    }
-  };
-
-  const mockCore = {
-    setFailed: () => { failed = true; }
-  };
-
-  await verifyMutationGate({ github: mockGithub, context: mockContext, core: mockCore });
-  assert.strictEqual(failed, false, 'Release PR tag without src/ changes should pass release gate');
-  console.log('✅ Test 10 Passed: verifyMutationGate succeeds via fallback on main with zero src/ drift');
+  console.log('\n🎉 ALL 9 QUALITY GATE TESTS PASSED!\n');
 })();

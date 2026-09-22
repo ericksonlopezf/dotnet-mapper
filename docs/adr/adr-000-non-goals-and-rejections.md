@@ -1,5 +1,11 @@
 # Non-Goals
 
+## Status
+Accepted
+
+## Date
+2026-09-04
+
 `EricksonLopez.Mapper` is strictly designed as an **AOT-First, Zero-Reflection, Zero-Overhead** source generator mapper. To maintain compile-time correctness and extreme performance, the following features are explicitly designated as **NON-GOALS**:
 
 ## 1. Deep Path Flattening

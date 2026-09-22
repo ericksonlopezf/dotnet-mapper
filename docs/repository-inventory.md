@@ -16,7 +16,7 @@ This document is a complete, verified inventory of all artifacts in the `Erickso
 | Local .NET Tools | `dotnet-tools.json` | Pinned tool: `dotnet-stryker` (v4.16.0) |
 | Code Coverage Config | `.codecov.yml` | Project target: 99% (1% tolerance), PR patch target: 90% (5% tolerance) |
 | Release Automation Config | `.release-please-config.json` | Conventional Commits to SemVer release automation |
-| Release Automation Manifest | `.release-please-manifest.json` | Current ecosystem version: `1.0.0` |
+| Release Automation Manifest | `.release-please-manifest.json` | Current ecosystem version: `2.0.0` |
 
 ---
 
@@ -58,7 +58,7 @@ All 8 test projects are included in the `EricksonLopez.Mapper.slnx` solution:
 | Project | Path | Target Framework | Description |
 |---|---|---|---|
 | `EricksonLopez.Mapper.Benchmarks` | `benchmarks/EricksonLopez.Mapper.Benchmarks/` | `net10.0` | BenchmarkDotNet v0.14.0 harness comparing against AutoMapper 13.0.1, Mapster 10.0.11, and Riok.Mapperly 4.3.1 |
-| `EricksonLopez.Mapper.Sample` | `sample/EricksonLopez.Mapper.Sample/` | `net10.0` | Comprehensive 10-level executable showcase covering all public APIs, extensions, and patterns |
+| `EricksonLopez.Mapper.Samples` | `samples/EricksonLopez.Mapper.Samples/` | `net10.0` | Comprehensive 11-level executable showcase covering all public APIs, extensions, and patterns |
 
 ---
 

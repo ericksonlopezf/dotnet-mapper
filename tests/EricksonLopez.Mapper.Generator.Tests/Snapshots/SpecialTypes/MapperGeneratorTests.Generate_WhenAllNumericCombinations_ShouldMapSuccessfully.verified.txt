@@ -1,9 +1,6 @@
 ﻿{
   Diagnostics: [
     (234,25): error ELM003: Cannot convert from 'byte' to 'sbyte' for member 'P_byte_sbyte',
-    (234,25): error ELM003: Cannot convert from 'byte' to 'uint' for member 'P_byte_uint',
-    (234,25): error ELM003: Cannot convert from 'byte' to 'ulong' for member 'P_byte_ulong',
-    (234,25): error ELM003: Cannot convert from 'byte' to 'ushort' for member 'P_byte_ushort',
     (234,25): warning ELM015: Narrowing numeric conversion from 'decimal' to 'double' for member 'P_decimal_double' may result in overflow or precision loss,
     (234,25): warning ELM015: Narrowing numeric conversion from 'decimal' to 'float' for member 'P_decimal_float' may result in overflow or precision loss,
     (234,25): warning ELM015: Narrowing numeric conversion from 'decimal' to 'int' for member 'P_decimal_int' may result in overflow or precision loss,
@@ -53,7 +50,6 @@
     (234,25): error ELM003: Cannot convert from 'uint' to 'int' for member 'P_uint_int',
     (234,25): error ELM003: Cannot convert from 'uint' to 'sbyte' for member 'P_uint_sbyte',
     (234,25): error ELM003: Cannot convert from 'uint' to 'short' for member 'P_uint_short',
-    (234,25): error ELM003: Cannot convert from 'uint' to 'ulong' for member 'P_uint_ulong',
     (234,25): error ELM003: Cannot convert from 'uint' to 'ushort' for member 'P_uint_ushort',
     (234,25): error ELM003: Cannot convert from 'ulong' to 'byte' for member 'P_ulong_byte',
     (234,25): error ELM003: Cannot convert from 'ulong' to 'int' for member 'P_ulong_int',
@@ -64,8 +60,6 @@
     (234,25): error ELM003: Cannot convert from 'ulong' to 'ushort' for member 'P_ulong_ushort',
     (234,25): error ELM003: Cannot convert from 'ushort' to 'byte' for member 'P_ushort_byte',
     (234,25): error ELM003: Cannot convert from 'ushort' to 'sbyte' for member 'P_ushort_sbyte',
-    (234,25): error ELM003: Cannot convert from 'ushort' to 'short' for member 'P_ushort_short',
-    (234,25): error ELM003: Cannot convert from 'ushort' to 'uint' for member 'P_ushort_uint',
-    (234,25): error ELM003: Cannot convert from 'ushort' to 'ulong' for member 'P_ushort_ulong'
+    (234,25): error ELM003: Cannot convert from 'ushort' to 'short' for member 'P_ushort_short'
   ]
 }

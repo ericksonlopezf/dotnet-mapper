@@ -16,7 +16,7 @@
       "low": 98,
       "break": 95
     },
-    "coverage-analysis": "all",
+    "coverage-analysis": "off",
     "reporters": [
       "html",
       "json",
@@ -26,6 +26,7 @@
     "ignore-methods": [
       "ConfigureAwait",
       "Dispose"
-    ]
+    ],
+    "concurrency": 2
   }
 }

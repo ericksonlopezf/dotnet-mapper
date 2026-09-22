@@ -70,6 +70,8 @@ public class MapperAnalyzer : DiagnosticAnalyzer
 
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.IdentifierName, SyntaxKind.SimpleMemberAccessExpression);
         context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, SyntaxKind.ClassDeclaration);
+        // FIX-C (DIAG-003): Also enforce ELM012 on interface declarations annotated with [Mapper].
+        context.RegisterSyntaxNodeAction(AnalyzeInterfaceDeclaration, SyntaxKind.InterfaceDeclaration);
     }
 
     private void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
@@ -83,6 +85,21 @@ public class MapperAnalyzer : DiagnosticAnalyzer
         if (!classDecl.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
             context.ReportDiagnostic(Diagnostic.Create(MustBePartial, classDecl.Identifier.GetLocation(), classDecl.Identifier.Text));
+        }
+    }
+
+    // FIX-C (DIAG-003): Enforce ELM012 on [Mapper]-annotated interfaces without the 'partial' modifier.
+    private void AnalyzeInterfaceDeclaration(SyntaxNodeAnalysisContext context)
+    {
+        var ifaceDecl = (InterfaceDeclarationSyntax)context.Node;
+        var typeSymbol = (INamedTypeSymbol)context.SemanticModel.GetDeclaredSymbol(ifaceDecl)!;
+
+        bool isMapper = typeSymbol.GetAttributes().Any(a => RoslynInvariants.GetAttributeClassFullName(a) == "EricksonLopez.Mapper.MapperAttribute");
+        if (!isMapper) return;
+
+        if (!ifaceDecl.Modifiers.Any(SyntaxKind.PartialKeyword))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(MustBePartial, ifaceDecl.Identifier.GetLocation(), ifaceDecl.Identifier.Text));
         }
     }
 
