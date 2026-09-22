@@ -22,8 +22,8 @@ public class MapperGenerator : IIncrementalGenerator
         var lineSpan = location.GetLineSpan();
         return new Models.DiagnosticInfo(
             descriptor.Id,
-            descriptor.Title.ToString(),
-            descriptor.MessageFormat.ToString(),
+            descriptor.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            descriptor.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
             descriptor.Category,
             (int)descriptor.DefaultSeverity,
             descriptor.IsEnabledByDefault,
@@ -166,6 +166,17 @@ public class MapperGenerator : IIncrementalGenerator
                     if (attr.ConstructorArguments[0].Value is string src &&
                         attr.ConstructorArguments[1].Value is string dst)
                     {
+                        // SEM-003 fix: Detect duplicate [MapProperty] destination to prevent silent overwrite.
+                        if (customMappings.ContainsKey(dst))
+                        {
+                            var attrLocation = attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                                ?? methodSymbol.Locations.FirstOrDefault()
+                                ?? Location.None;
+                            diagnostics.Add(CreateDiagnostic(
+                                DiagnosticDescriptors.DuplicateMapPropertyDestination,
+                                attrLocation,
+                                dst, src));
+                        }
                         customMappings[dst] = src;
                     }
                 }
@@ -335,14 +346,31 @@ public class MapperGenerator : IIncrementalGenerator
                 : new List<IMethodSymbol>();
 
             var factories = new List<IMethodSymbol>();
+            string? specifiedFactoryName = null;
             if (targetType is INamedTypeSymbol ntt)
             {
                 var factoryAttr = methodSymbol.GetAttributes().FirstOrDefault(a => RoslynInvariants.GetAttributeClassName(a) is "MapFactoryAttribute");
                 if (factoryAttr != null && factoryAttr.ConstructorArguments.Length == 1 && factoryAttr.ConstructorArguments[0].Value is string factoryName)
                 {
+                    specifiedFactoryName = factoryName;
                     factories = ntt.GetMembers().OfType<IMethodSymbol>()
                         .Where(m => m.IsStatic && m.DeclaredAccessibility == Accessibility.Public && m.Name == factoryName && SymbolEqualityComparer.Default.Equals(m.ReturnType, targetType))
                         .ToList();
+
+                    // FIX-A (DIAG-007): [MapFactory] references a factory method that does not exist.
+                    // Previously this was silently ignored, causing the generator to fall through to
+                    // constructors. Now we emit ELM017 (Error) so the developer is aware immediately.
+                    if (factories.Count == 0)
+                    {
+                        var factoryAttrLocation = factoryAttr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                            ?? RoslynInvariants.GetLocation(methodSymbol);
+                        diagnostics.Add(CreateDiagnostic(
+                            DiagnosticDescriptors.MapFactoryMethodNotFound,
+                            factoryAttrLocation,
+                            factoryName,
+                            targetType.ToDisplayString()));
+                        continue;
+                    }
                 }
             }
 
@@ -710,6 +738,12 @@ public class MapperGenerator : IIncrementalGenerator
         cancellationToken.ThrowIfCancellationRequested();
 
         string sourceCode = CodeEmitter.GenerateSourceCode(typeMapping);
-        addSource($"{CodeEmitter.EscapeIdentifier(typeMapping.ClassName).Replace("@", "")}.g.cs", SourceText.From(sourceCode, Encoding.UTF8));
+        // GEN-003 fix: Include namespace in file name to prevent collision when two mappers
+        // share the same simple class name but live in different namespaces.
+        string safeClassName = CodeEmitter.EscapeIdentifier(typeMapping.ClassName).Replace("@", "");
+        string sourceFileName = string.IsNullOrWhiteSpace(typeMapping.Namespace)
+            ? $"{safeClassName}.g.cs"
+            : $"{CodeEmitter.EscapeIdentifier(typeMapping.Namespace).Replace("@", "").Replace(".", "_")}_{safeClassName}.g.cs";
+        addSource(sourceFileName, SourceText.From(sourceCode, Encoding.UTF8));
     }
 }

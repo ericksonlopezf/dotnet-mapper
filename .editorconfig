@@ -59,6 +59,9 @@ dotnet_diagnostic.CA1305.severity = warning
 dotnet_diagnostic.CS0618.severity = error
 dotnet_diagnostic.CS0619.severity = error
 
+# CS0159 / CS159: The label cannot be found / invalid jump target
+dotnet_diagnostic.CS0159.severity = error
+
 # xUnit1051: Async fixture lifecycle
 dotnet_diagnostic.xUnit1051.severity = warning
 
@@ -88,7 +91,7 @@ dotnet_diagnostic.CA1305.severity = suggestion
 dotnet_diagnostic.CS1591.severity = none
 
 # ─── Benchmark & Sample Files Configuration ───
-[{benchmarks,sample}/**.cs]
+[{benchmarks,samples}/**.cs]
 dotnet_diagnostic.CA1707.severity = suggestion
 dotnet_diagnostic.CA1305.severity = suggestion
 dotnet_diagnostic.CS1591.severity = none

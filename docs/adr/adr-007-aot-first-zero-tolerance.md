@@ -1,5 +1,11 @@
 # ADR-007: AOT-First, Zero Tolerance
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13
 

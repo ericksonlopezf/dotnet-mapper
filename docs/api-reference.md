@@ -1,527 +1,564 @@
-# API Reference: EricksonLopez.Mapper Ecosystem
+# Official API Reference: EricksonLopez.Mapper Ecosystem
 
-> **Source of Truth:** Canonical reference generated from the public API surface defined across `EricksonLopez.Mapper.Abstractions`, `EricksonLopez.Mapper.DomainPrimitives`, `EricksonLopez.Mapper.Result`, and `EricksonLopez.Mapper.Mapster`.
-> Every code snippet and signature in this document is verified against current source contracts and `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`.
+> **Source of Truth:** Canonical documentation generated from public symbols exported in `PublicAPI.Shipped.txt` (`EricksonLopez.Mapper.Abstractions`), `EricksonLopez.Mapper.DomainPrimitives`, `EricksonLopez.Mapper.Result`, `EricksonLopez.Mapper.Mapster`, and Roslyn generator emitted code (`EricksonLopez.Mapper.Generator`).  
+> **Style:** Formal **Microsoft Learn**-grade technical specification.
 
 ---
 
-## 1. Core Attributes (`EricksonLopez.Mapper.Abstractions`)
+## Table of Contents
+
+1. [Core Abstractions and Attributes (`EricksonLopez.Mapper.Abstractions`)](#1-core-abstractions-and-attributes)
+   - [`MapperAttribute`](#mapperattribute)
+   - [`MapPropertyAttribute`](#mappropertyattribute)
+   - [`MapIgnoreAttribute`](#mapignoreattribute)
+   - [`MapIgnoreSourceAttribute`](#mapignoresourceattribute)
+   - [`MapperIgnoreAttribute`](#mapperignoreattribute)
+   - [`MapValueAttribute`](#mapvalueattribute)
+   - [`EnumMappingStrategyAttribute` and `EnumMappingStrategy`](#enummappingstrategyattribute-and-enummappingstrategy)
+   - [`MapEnumValueAttribute`](#mapenumvalueattribute)
+   - [`MapperDefaultsAttribute`](#mapperdefaultsattribute)
+   - [`MapFactoryAttribute`](#mapfactoryattribute)
+   - [`MapDerivedTypeAttribute`](#mapderivedtypeattribute)
+   - [`UseConverterAttribute`](#useconverterattribute)
+   - [`MapNullFallbackAttribute`](#mapnullfallbackattribute)
+   - [`GenerateMapperRegistrationAttribute`](#generatemapperregistrationattribute)
+   - [`ValueObjectAttribute`](#valueobjectattribute)
+2. [Core Interfaces](#2-core-interfaces)
+   - [`IConverter<TSource, TDestination>.Convert`](#iconvertertsource-tdestinationconvert)
+3. [Extension Package: `EricksonLopez.Mapper.DomainPrimitives`](#3-extension-package-ericksonlopezmapperdomainprimitives)
+   - [`DomainPrimitiveToValueConverter<TPrimitive, TValue>.Convert`](#domainprimitivetovalueconvertertprimitive-tvalueconvert)
+   - [`StrongIdToValueConverter<TStrongId, TValue>.Convert`](#strongidtovalueconvertertstrongid-tvalueconvert)
+   - [`ValueToDomainPrimitiveConverter<TValue, TPrimitive>.Convert`](#valuetodomainprimitiveconvertertvalue-tprimitiveconvert)
+4. [Extension Package: `EricksonLopez.Mapper.Result`](#4-extension-package-ericksonlopezmapperresult)
+   - [`ResultMappingExtensions.Map`](#resultmappingextensionsmap)
+   - [`ResultMappingExtensions.MapAsync` (Task)](#resultmappingextensionsmapasync-task)
+   - [`ResultMappingExtensions.MapAsync` (ValueTask)](#resultmappingextensionsmapasync-valuetask)
+   - [`ResultMappingExtensions.MapList`](#resultmappingextensionsmaplist)
+5. [Extension Package: `EricksonLopez.Mapper.Mapster`](#5-extension-package-ericksonlopezmappermapster)
+   - [`MapsterConverter<TSource, TDestination>` (Constructors)](#mapsterconvertertsource-tdestination-constructors)
+   - [`MapsterConverter<TSource, TDestination>.Convert`](#mapsterconvertertsource-tdestinationconvert)
+   - [`MapsterMapperExtensions.UseConverter`](#mapstermapperextensionsuseconverter)
+6. [Generator-Emitted Extension Methods](#6-generator-emitted-extension-methods)
+   - [`MapperServiceCollectionExtensions.AddGeneratedMappers`](#mapperservicecollectionextensionsaddgeneratedmappers)
+7. [Compilation Diagnostics Catalog (ELM001–ELM016)](#7-compilation-diagnostics-catalog-elm001elm016)
+
+---
+
+## 1. Core Abstractions and Attributes
 
 ### `MapperAttribute`
+Instructs the Roslyn Incremental Source Generator to implement partial methods declared on the annotated class or interface.
 
-Instructs the Source Generator to implement the `partial` mapping methods defined in the annotated class or interface.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
-public sealed class MapperAttribute : Attribute
-{
-    public bool StrictMapping { get; set; } = true;
-}
-```
-
-- `StrictMapping` (default `true`): When enabled, all destination properties must be matched or explicitly excluded. Unmapped destination properties produce `ELM001` at compile time.
-
-```csharp
-[Mapper(StrictMapping = true)]
-public partial class UserMapper
-{
-    public partial UserDto Map(User source);
-}
-```
+- **Signature:** `public sealed class MapperAttribute : Attribute`
+- **Constructor:** `public MapperAttribute()`
+- **Properties:** `public bool StrictMapping { get; set; } = true;`
+- **Remarks:** When `StrictMapping = true`, any destination property lacking a matching source member or explicit mapping rule triggers compilation error `ELM001`.
+- **Basic Example:**
+  ```csharp
+  [Mapper]
+  public partial class UserMapper { public partial UserDto Map(User source); }
+  ```
+- **Advanced Example:**
+  ```csharp
+  [Mapper(StrictMapping = false)]
+  public partial class LegacyMapper { public partial PartialDto Map(RichEntity source); }
+  ```
+- **Best Practices:** Keep `StrictMapping = true` on all new code to prevent accidental contract desynchronization.
+- **Performance:** Zero runtime cost. All processing executes at compile time.
+- **Common Mistakes:** Omitting the `partial` modifier on the mapper class (`ELM012`).
+- **When to Use:** On any class declaring mapping methods generated by the library.
+- **When NOT to Use:** On purely manual helper classes or external utility methods.
 
 ---
 
 ### `MapPropertyAttribute`
+Configures explicit member pairing between a source property and a destination property when names differ or when flattening nested paths.
 
-Explicitly maps a source member or deep path to a destination member when names differ.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapPropertyAttribute : Attribute
-{
-    public string SourceName { get; }
-    public string DestinationName { get; }
-
-    public MapPropertyAttribute(string sourceName, string destinationName);
-}
-```
-
-- Supports deep dot-notation navigation (e.g. `"Customer.Address.City"`, `"City"`) with safe null navigation (`?.`).
-
-```csharp
-[Mapper]
-public partial class OrderMapper
-{
-    [MapProperty("Customer.Address.City", "City")]
-    [MapProperty("TotalAmount", "Amount")]
-    public partial OrderSummaryDto Map(Order source);
-}
-```
+- **Signature:** `public sealed class MapPropertyAttribute : Attribute`
+- **Parameters:** `string sourceName`, `string destinationName`
+- **Remarks:** Supports deep dot-separated navigation paths (`"Customer.Address.City"`).
+- **Basic Example:**
+  ```csharp
+  [MapProperty("InternalId", "CustomerId")]
+  public partial CustomerDto Map(Customer source);
+  ```
+- **Advanced Example:**
+  ```csharp
+  [MapProperty("Customer.Address.City", "City")]
+  public partial OrderSummaryDto Map(Order source);
+  ```
+- **Best Practices:** Prefer `nameof(...)` for single-level member names over string literals.
+- **Performance:** Direct C# member assignment without overhead.
+- **Common Mistakes:** Inverting parameter order (`destinationName` first instead of `sourceName`).
+- **When to Use:** When models use distinct naming conventions or when flattening nested hierarchical properties.
+- **When NOT to Use:** When properties share identical names and compatible types (convention matches automatically).
 
 ---
 
 ### `MapIgnoreAttribute`
+Explicitly excludes a destination property from mapping, suppressing `ELM001` in strict mode.
 
-Explicitly excludes a **destination** property from mapping, suppressing `ELM001` in strict mode.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapIgnoreAttribute : Attribute
-{
-    public string DestinationName { get; }
-
-    public MapIgnoreAttribute(string destinationName);
-}
-```
-
-```csharp
-[Mapper]
-public partial class UserMapper
-{
-    [MapIgnore("InternalToken")]
-    public partial UserDto Map(User source);
-}
-```
+- **Signature:** `public sealed class MapIgnoreAttribute : Attribute`
+- **Parameters:** `string destinationName`
+- **Remarks:** Placed on the mapping method.
+- **Basic Example:**
+  ```csharp
+  [MapIgnore("InternalToken")]
+  public partial UserDto Map(User source);
+  ```
+- **Advanced Example:**
+  ```csharp
+  [MapIgnore(nameof(OrderDto.ComputedScore))]
+  [MapIgnore(nameof(OrderDto.AuditedBy))]
+  public partial OrderDto Map(Order source);
+  ```
+- **Best Practices:** Document why the destination property is left unmapped or uninitialized.
+- **Performance:** Zero cost; suppresses assignment code generation entirely.
+- **Common Mistakes:** Supplying a source property name instead of the destination property name.
+- **When to Use:** For destination properties computed post-mapping or intended strictly for internal use.
+- **When NOT to Use:** To ignore sensitive source properties (use `[MapIgnoreSource]`).
 
 ---
 
 ### `MapIgnoreSourceAttribute`
+Explicitly excludes a source property from member resolution.
 
-Explicitly excludes a **source** property from participating in member resolution.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapIgnoreSourceAttribute : Attribute
-{
-    public string SourceName { get; }
-
-    public MapIgnoreSourceAttribute(string sourceName);
-}
-```
-
-```csharp
-[Mapper]
-public partial class SecurityMapper
-{
-    [MapIgnoreSource("PasswordHash")]
-    public partial UserDto Map(UserEntity source);
-}
-```
+- **Signature:** `public sealed class MapIgnoreSourceAttribute : Attribute`
+- **Parameters:** `string sourceName`
+- **Remarks:** Ensures sensitive source properties cannot be accidentally mapped to destination members with matching names.
+- **Basic Example:**
+  ```csharp
+  [MapIgnoreSource("PasswordHash")]
+  public partial UserDto Map(UserEntity source);
+  ```
+- **Advanced Example:**
+  ```csharp
+  [MapIgnoreSource(nameof(UserEntity.PasswordHash))]
+  [MapIgnoreSource(nameof(UserEntity.SecurityStamp))]
+  public partial PublicUserDto Map(UserEntity source);
+  ```
+- **Best Practices:** Apply to mappers projecting domain entities onto public DTOs.
+- **Performance:** Zero runtime cost.
+- **Common Mistakes:** Confusing with `[MapIgnore]`.
+- **When to Use:** On security or persistence entities to seal confidential fields.
+- **When NOT to Use:** On destination DTOs.
 
 ---
 
 ### `MapperIgnoreAttribute`
+Globally and permanently excludes a property or field from participating in any mapping across the entire solution.
 
-Excludes a property or field from all mapping operations when placed directly on the model member.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-public sealed class MapperIgnoreAttribute : Attribute;
-```
-
-```csharp
-public class UserEntity
-{
-    public Guid Id { get; set; }
-
-    [MapperIgnore]
-    public string InternalCacheKey { get; set; }
-}
-```
+- **Signature:** `public sealed class MapperIgnoreAttribute : Attribute`
+- **Constructor:** `public MapperIgnoreAttribute()`
+- **Target:** `AttributeTargets.Property | AttributeTargets.Field`
+- **Remarks:** Placed directly on the member in the model definition.
+- **Basic Example:**
+  ```csharp
+  public class Entity { public Guid Id { get; set; } [MapperIgnore] public string CacheToken { get; set; } }
+  ```
+- **Best Practices:** Use for ORM transient state, change trackers, or in-memory cache tokens.
+- **When to Use:** For model members that must never participate in projections.
+- **When NOT to Use:** For conditional exclusions that depend on specific mapping methods.
 
 ---
 
 ### `MapValueAttribute`
+Injects a literal or computed C# expression directly into a destination property or parameter.
 
-Assigns a constant or computed C# expression directly to a destination property or constructor parameter.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapValueAttribute : Attribute
-{
-    public string DestinationName { get; }
-    public string ValueExpression { get; }
-
-    public MapValueAttribute(string destinationName, string valueExpression);
-}
-```
-
-```csharp
-[Mapper]
-public partial class AuditMapper
-{
-    [MapValue("CreatedAt", "System.DateTime.UtcNow")]
-    [MapValue("Environment", "\"Production\"")]
-    public partial AuditRecordDto Map(Entity source);
-}
-```
+- **Signature:** `public sealed class MapValueAttribute : Attribute`
+- **Parameters:** `string destinationName`, `string valueExpression`
+- **Remarks:** The expression must be valid C# syntax in the scope of the generated method.
+- **Basic Example:**
+  ```csharp
+  [MapValue("Status", "\"ACTIVE\"")]
+  public partial AccountDto Map(Request source);
+  ```
+- **Advanced Example:**
+  ```csharp
+  [MapValue(nameof(AuditDto.ProcessedAt), "System.DateTime.UtcNow")]
+  public partial AuditDto Map(Request source);
+  ```
+- **Best Practices:** Properly escape quotation marks for string literals (`"\"VALUE\""`).
+- **Common Mistakes:** Omitting namespace qualifiers on static types (`DateTime.UtcNow` without `System.`).
+- **When to Use:** To bind constants, UTC timestamps, or environment metadata.
+- **When NOT to Use:** For complex domain calculations requiring external service injection.
 
 ---
 
-### `EnumMappingStrategyAttribute`
+### `EnumMappingStrategyAttribute` and `EnumMappingStrategy`
+Controls whether the generator matches enum members by identifier name (`ByName`) or integral value (`ByValue`), and configures case sensitivity.
 
-Configures enum member matching strategy (`ByName` vs `ByValue`) and case-sensitivity for a class or method.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-public sealed class EnumMappingStrategyAttribute : Attribute
-{
-    public EnumMappingStrategy Strategy { get; }
-    public bool IgnoreCase { get; set; }
-
-    public EnumMappingStrategyAttribute(EnumMappingStrategy strategy);
-}
-```
-
-```csharp
-[Mapper]
-[EnumMappingStrategy(EnumMappingStrategy.ByName, IgnoreCase = true)]
-public partial class StatusMapper
-{
-    public partial OrderStatusDto Map(OrderState source);
-}
-```
+- **Signature:** `public sealed class EnumMappingStrategyAttribute : Attribute`
+- **Constructor:** `public EnumMappingStrategyAttribute(EnumMappingStrategy strategy)`
+- **Property:** `public bool IgnoreCase { get; set; }`
+- **Enum:**
+  ```csharp
+  public enum EnumMappingStrategy { ByName = 0, ByValue = 1 }
+  ```
+- **Basic Example:**
+  ```csharp
+  [EnumMappingStrategy(EnumMappingStrategy.ByName, IgnoreCase = true)]
+  public partial DestStatus Map(SourceStatus source);
+  ```
+- **Advanced Example:**
+  ```csharp
+  [EnumMappingStrategy(EnumMappingStrategy.ByValue)]
+  public partial ExternalCode Map(InternalCode source);
+  ```
+- **Best Practices:** Use `ByName` with `IgnoreCase = true` for JSON / HTTP external integrations.
+- **Common Mistakes:** Using `ByValue` when integer values represent distinct meanings across tiers.
 
 ---
 
 ### `MapEnumValueAttribute`
+Explicitly pairs enum members with disparate identifier names.
 
-Explicitly maps a source enum member to a destination enum member when names differ.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapEnumValueAttribute : Attribute
-{
-    public object Source { get; }
-    public object Target { get; }
-
-    public MapEnumValueAttribute(object source, object target);
-}
-```
-
-```csharp
-[Mapper]
-public partial class OrderMapper
-{
-    [MapEnumValue(PaymentStatus.Pending, OrderStatus.Queued)]
-    [MapEnumValue(PaymentStatus.Captured, OrderStatus.Completed)]
-    public partial OrderStatus Map(PaymentStatus source);
-}
-```
+- **Signature:** `public sealed class MapEnumValueAttribute : Attribute`
+- **Parameters:** `object source`, `object target`
+- **Basic Example:**
+  ```csharp
+  [MapEnumValue(PaymentStatus.Pending, OrderStatus.Queued)]
+  public partial OrderStatus Map(PaymentStatus source);
+  ```
+- **Best Practices:** Cover all valid states of the source enum to avoid unmapped cases in strict mode.
+- **When to Use:** When enum member names do not match across architectural boundaries.
 
 ---
 
 ### `MapperDefaultsAttribute`
+Defines assembly-level conventions for all mappers within the compilation.
 
-Specifies assembly-wide defaults for `StrictMapping`, `EnumMappingStrategy`, and `EnumIgnoreCase`.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
-public sealed class MapperDefaultsAttribute : Attribute
-{
-    public EnumMappingStrategy EnumMappingStrategy { get; set; } = EnumMappingStrategy.ByName;
-    public bool EnumIgnoreCase { get; set; } = false;
-    public bool StrictMapping { get; set; } = true;
-}
-```
-
-```csharp
-[assembly: MapperDefaults(StrictMapping = true, EnumMappingStrategy = EnumMappingStrategy.ByName, EnumIgnoreCase = true)]
-```
+- **Signature:** `public sealed class MapperDefaultsAttribute : Attribute`
+- **Properties:** `StrictMapping { get; set; }`, `EnumMappingStrategy { get; set; }`, `EnumIgnoreCase { get; set; }`
+- **Target:** `AttributeTargets.Assembly`
+- **Basic Example:**
+  ```csharp
+  [assembly: MapperDefaults(StrictMapping = true, EnumMappingStrategy = EnumMappingStrategy.ByName, EnumIgnoreCase = true)]
+  ```
+- **Best Practices:** Declare in `AssemblyConfig.cs`.
 
 ---
 
 ### `MapFactoryAttribute`
+Instantiates the destination type by calling a static factory method instead of public constructors.
 
-Instructs the generator to instantiate the destination type by calling a static factory method.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-public sealed class MapFactoryAttribute : Attribute
-{
-    public string MethodName { get; }
-
-    public MapFactoryAttribute(string methodName);
-}
-```
-
-```csharp
-[Mapper]
-public partial class OrderMapper
-{
-    [MapFactory("Create")]
-    public partial OrderEntity Map(CreateOrderRequest source);
-}
-```
+- **Signature:** `public sealed class MapFactoryAttribute : Attribute`
+- **Parameters:** `string methodName`
+- **Basic Example:**
+  ```csharp
+  [MapFactory("Create")]
+  public partial Money Map(MoneyDto source);
+  ```
+- **Best Practices:** Use with Value Objects and DDD domain entities that validate invariants during instantiation.
+- **Common Mistakes:** Declaring the factory method as private or instance-scoped (`ELM002`).
 
 ---
 
 ### `MapDerivedTypeAttribute`
+Enables compile-time polymorphic dispatch using pattern matching `switch` expressions.
 
-Registers a derived source type and its target type for compile-time polymorphic dispatch (pattern-matching switch).
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapDerivedTypeAttribute : Attribute
-{
-    public Type SourceType { get; }
-    public Type TargetType { get; }
-
-    public MapDerivedTypeAttribute(Type sourceType, Type targetType);
-}
-```
-
-```csharp
-[Mapper]
-public partial class VehicleMapper
-{
-    [MapDerivedType(typeof(CarEntity), typeof(CarDto))]
-    [MapDerivedType(typeof(TruckEntity), typeof(TruckDto))]
-    public partial VehicleDto Map(VehicleEntity source);
-
-    public partial CarDto MapCar(CarEntity source);
-    public partial TruckDto MapTruck(TruckEntity source);
-}
-```
+- **Signature:** `public sealed class MapDerivedTypeAttribute : Attribute`
+- **Parameters:** `Type sourceType`, `Type targetType`
+- **Basic Example:**
+  ```csharp
+  [MapDerivedType(typeof(Car), typeof(CarDto))]
+  [MapDerivedType(typeof(Truck), typeof(TruckDto))]
+  public partial VehicleDto Map(Vehicle source);
+  ```
+- **Best Practices:** Declare specific sub-mapping methods for each derived type (`MapCar`, `MapTruck`).
+- **Performance:** Zero reflection; RyuJIT emits optimized direct jumps.
 
 ---
 
 ### `UseConverterAttribute`
+Delegates mapping logic to an `IConverter<TSource, TDestination>` specified by type or injected field name.
 
-Specifies a custom `IConverter<TSource, TDestination>` type or an instance field holding a converter.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-public sealed class UseConverterAttribute : Attribute
-{
-    public Type ConverterType { get; }
-    public string? ConverterFieldName { get; }
-
-    public UseConverterAttribute(Type converterType);
-    public UseConverterAttribute(string converterFieldName);
-}
-```
-
-```csharp
-[Mapper]
-public partial class ShipmentMapper
-{
-    [UseConverter(typeof(CustomAddressConverter))]
-    public partial AddressDto MapAddress(Address source);
-}
-```
+- **Signature:** `public sealed class UseConverterAttribute : Attribute`
+- **Constructors:** `UseConverterAttribute(Type converterType)`, `UseConverterAttribute(string converterFieldName)`
+- **Type-Based Example:**
+  ```csharp
+  [UseConverter(typeof(AddressConverter))]
+  public partial AddressDto Map(Address source);
+  ```
+- **Field-Based Example:**
+  ```csharp
+  [UseConverter(nameof(_converter))]
+  public partial UserDto Map(LegacyUser source);
+  ```
+- **Best Practices:** Use the field constructor when the converter requires dependencies from IoC.
 
 ---
 
 ### `MapNullFallbackAttribute`
+Emits a literal fallback expression when a nullable value type member evaluates to null.
 
-Emits a literal C# expression as fallback when a nullable source member is null and destination is non-nullable.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class MapNullFallbackAttribute : Attribute
-{
-    public string DestinationName { get; }
-    public string FallbackExpression { get; }
-
-    public MapNullFallbackAttribute(string destinationName, string fallbackExpression);
-}
-```
-
-```csharp
-[Mapper]
-public partial class ProductMapper
-{
-    [MapNullFallback("Price", "0m")]
-    public partial ProductDto Map(ProductEntity source);
-}
-```
+- **Signature:** `public sealed class MapNullFallbackAttribute : Attribute`
+- **Parameters:** `string destinationName`, `string fallbackExpression`
+- **Basic Example:**
+  ```csharp
+  [MapNullFallback("Price", "0.0m")]
+  public partial ProductDto Map(Product source);
+  ```
+- **Best Practices:** Use exact, typed C# literals.
 
 ---
 
 ### `GenerateMapperRegistrationAttribute`
+Instructs the generator to emit `AddGeneratedMappers(this IServiceCollection)` for the assembly.
 
-Emits an `AddGeneratedMappers(this IServiceCollection)` extension method for automated DI registration.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
-public sealed class GenerateMapperRegistrationAttribute : Attribute;
-```
-
-```csharp
-[assembly: GenerateMapperRegistration]
-```
-
-**DI Lifetime Behavior:**
-- All non-static `[Mapper]` classes → registered as `Singleton` (stateless, thread-safe).
-- Custom converters referenced via `[UseConverter(typeof(MyConverter))]` → registered as `Transient`.
-- Static `partial class` mappers → omitted (no instantiation required).
+- **Signature:** `public sealed class GenerateMapperRegistrationAttribute : Attribute`
+- **Target:** `AttributeTargets.Assembly`
+- **Basic Example:**
+  ```csharp
+  [assembly: GenerateMapperRegistration]
+  ```
 
 ---
 
 ### `ValueObjectAttribute`
+Marks a class or struct as a Domain Value Object, allowing the generator to automatically wrap and unwrap its inner `.Value` property.
 
-Marks a class or struct as a Value Object to enable automatic wrap/unwrap.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-public sealed class ValueObjectAttribute : Attribute;
-```
-
-```csharp
-[ValueObject]
-public readonly record struct CustomerId(Guid Value);
-```
+- **Signature:** `public sealed class ValueObjectAttribute : Attribute`
+- **Target:** `AttributeTargets.Class | AttributeTargets.Struct`
+- **Basic Example:**
+  ```csharp
+  [ValueObject]
+  public readonly record struct CustomerId(Guid Value);
+  ```
 
 ---
 
-## 2. Core Interfaces & Enums (`EricksonLopez.Mapper.Abstractions`)
+## 2. Core Interfaces
 
-### `IConverter<TSource, TDestination>`
+### `IConverter<TSource, TDestination>.Convert`
 
-Contract for custom type-to-type conversion.
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-public interface IConverter<TSource, TDestination>
-{
-    TDestination Convert(TSource source);
-}
-```
-
-### `EnumMappingStrategy`
-
-```csharp
-namespace EricksonLopez.Mapper;
-
-public enum EnumMappingStrategy
-{
-    ByName = 0,
-    ByValue = 1
-}
-```
-
----
-
-## 3. Extension Packages
-
-### `EricksonLopez.Mapper.DomainPrimitives`
-
-Converters for `EricksonLopez.DomainPrimitives`:
-
-```csharp
-namespace EricksonLopez.Mapper.DomainPrimitives;
-
-public sealed class DomainPrimitiveToValueConverter<TPrimitive, TValue> : IConverter<TPrimitive, TValue>
-    where TPrimitive : IDomainPrimitive<TPrimitive, TValue>
-    where TValue : notnull, IComparable<TValue>, IEquatable<TValue>;
-
-public sealed class StrongIdToValueConverter<TStrongId, TValue> : IConverter<TStrongId, TValue>
-    where TStrongId : IStrongId<TStrongId, TValue>
-    where TValue : notnull, IComparable<TValue>, IEquatable<TValue>;
-
-// Available on .NET 7+ (static abstract interface members). All supported target frameworks satisfy this requirement.
-#if NET7_0_OR_GREATER
-public sealed class ValueToDomainPrimitiveConverter<TValue, TPrimitive> : IConverter<TValue, TPrimitive>
-    where TPrimitive : IDomainPrimitive<TPrimitive, TValue>
-    where TValue : notnull, IComparable<TValue>, IEquatable<TValue>;
-#endif
-```
-
-### `EricksonLopez.Mapper.Result`
-
-Functional mapping extensions for `Result<T>`:
-
-```csharp
-namespace EricksonLopez.Mapper.Result;
-
-public static class ResultMappingExtensions
-{
-    public static Result<TDest> Map<TSource, TDest>(
-        this Result<TSource> result, Func<TSource, TDest> mapFunc);
-
-    public static Task<Result<TDest>> MapAsync<TSource, TDest>(
-        this Task<Result<TSource>> resultTask, Func<TSource, TDest> mapFunc);
-
-    public static ValueTask<Result<TDest>> MapAsync<TSource, TDest>(
-        this ValueTask<Result<TSource>> resultTask, Func<TSource, TDest> mapFunc);
-
-    public static Result<IReadOnlyList<TDest>> MapList<TSource, TDest>(
-        this Result<IEnumerable<TSource>> result, Func<TSource, TDest> mapFunc);
-}
-```
-
-### `EricksonLopez.Mapper.Mapster`
-
-Bi-directional integration with Mapster:
-
-```csharp
-namespace EricksonLopez.Mapper.Mapster;
-
-public sealed class MapsterConverter<TSource, TDestination> : IConverter<TSource, TDestination>
-{
-    public MapsterConverter();
-    public MapsterConverter(TypeAdapterConfig config);
-    public TDestination Convert(TSource source);
-}
-
-public static class MapsterMapperExtensions
-{
-    public static TypeAdapterConfig UseConverter<TSource, TDestination>(
-        this TypeAdapterConfig config, IConverter<TSource, TDestination> converter);
-}
-```
+- **Signature:** `TDestination Convert(TSource source);`
+- **Parameters:** `TSource source`: Input object to transform.
+- **Return:** `TDestination`: Transformed instance.
+- **Exceptions:** As defined by conversion logic (e.g., `FormatException`, `ArgumentNullException`).
+- **Remarks:** Serves as the canonical decoupled transformation contract across the ecosystem.
+- **Basic Example:**
+  ```csharp
+  public class StringToIntConverter : IConverter<string, int>
+  {
+      public int Convert(string source) => int.Parse(source);
+  }
+  ```
+- **Advanced Example:**
+  ```csharp
+  public class LocalizedDateConverter : IConverter<DateTime, string>
+  {
+      private readonly CultureInfo _culture;
+      public LocalizedDateConverter(CultureInfo culture) => _culture = culture;
+      public string Convert(DateTime source) => source.ToString("d", _culture);
+  }
+  ```
+- **Best Practices:** Keep converter implementations pure, stateless, and non-blocking.
+- **Performance:** Direct interface call compatible with JIT devirtualization.
+- **Common Mistakes:** Throwing undocumented generic exceptions.
+- **When to Use:** For conversions that cannot be inferred automatically by naming conventions.
+- **When NOT to Use:** For straightforward member-to-member mappings with identical names and types.
 
 ---
 
-## 4. Diagnostics Index (ELM001–ELM016)
+## 3. Extension Package: `EricksonLopez.Mapper.DomainPrimitives`
 
-| Code | Severity | Description | Fix |
+### `DomainPrimitiveToValueConverter<TPrimitive, TValue>.Convert`
+Extracts the underlying scalar `.Value` from an `IDomainPrimitive`.
+
+- **Signature:** `public TValue Convert(TPrimitive source)`
+- **Parameters:** `TPrimitive source`: Domain primitive instance.
+- **Return:** `TValue`: Extracted scalar primitive value.
+- **Exceptions:** `ArgumentNullException` if `source` is null.
+- **Remarks:** Zero-allocation; optimized for Domain $\rightarrow$ Persistence / DTO boundaries.
+- **Example:**
+  ```csharp
+  var converter = new DomainPrimitiveToValueConverter<EmailAddress, string>();
+  string email = converter.Convert(domainEmail);
+  ```
+- **When to Use:** When persisting or serializing domain primitives to databases or JSON.
+- **When NOT to Use:** If the type does not implement `IDomainPrimitive<TSelf, TValue>`.
+
+---
+
+### `StrongIdToValueConverter<TStrongId, TValue>.Convert`
+Extracts the scalar `.Value` from a strongly typed identifier `IStrongId`.
+
+- **Signature:** `public TValue Convert(TStrongId source)`
+- **Parameters:** `TStrongId source`: Strongly typed ID instance.
+- **Return:** `TValue`: Primitive identifier (`Guid`, `int`, `long`, etc.).
+- **Exceptions:** None for structs (`readonly record struct`).
+- **Example:**
+  ```csharp
+  var converter = new StrongIdToValueConverter<CustomerId, Guid>();
+  Guid rawId = converter.Convert(customerId);
+  ```
+- **When to Use:** Unpacking DDD identity wrappers before writing to databases (e.g., PostgreSQL / Dapper).
+
+---
+
+### `ValueToDomainPrimitiveConverter<TValue, TPrimitive>.Convert`
+Rehydrates an `IDomainPrimitive` instance by invoking the static factory method `TPrimitive.Create(value)`.
+
+- **Signature:** `public TPrimitive Convert(TValue source)`
+- **Parameters:** `TValue source`: Scalar value from database or external request.
+- **Return:** `TPrimitive`: Validated domain primitive instance.
+- **Exceptions:** Business validation exceptions defined in `Create` if the scalar input is invalid.
+- **Remarks:** Requires .NET 7+ static abstract interface members.
+- **Example:**
+  ```csharp
+  var converter = new ValueToDomainPrimitiveConverter<string, EmailAddress>();
+  EmailAddress email = converter.Convert("valid@example.com");
+  ```
+- **When to Use:** Hydrating rich domain models from persistence or HTTP input contracts.
+
+---
+
+## 4. Extension Package: `EricksonLopez.Mapper.Result`
+
+### `ResultMappingExtensions.Map`
+Synchronously projects the success value of a `Result<T>`.
+
+- **Signature:**
+  ```csharp
+  public static Result<TDest> Map<TSource, TDest>(
+      this Result<TSource> result,
+      Func<TSource, TDest> mapFunc);
+  ```
+- **Parameters:**
+  - `this Result<TSource> result`: Source result instance.
+  - `Func<TSource, TDest> mapFunc`: Transformation delegate (typically `mapper.Map`).
+- **Return:** `Result<TDest>` containing the projected value if successful, or the original `Error` if failed.
+- **Exceptions:** `ArgumentNullException` if `mapFunc` is null.
+- **Remarks:** If `result.IsFailure` is true, `mapFunc` **never executes**, short-circuiting efficiently.
+- **Example:**
+  ```csharp
+  Result<UserEntity> entityResult = repository.GetById(id);
+  Result<UserDto> dtoResult = entityResult.Map(userMapper.Map);
+  ```
+- **Performance:** Zero additional heap allocation over the underlying result structure.
+
+---
+
+### `ResultMappingExtensions.MapAsync` (Task)
+Asynchronously projects the success value of an operation returning `Task<Result<T>>`.
+
+- **Signature:**
+  ```csharp
+  public static async Task<Result<TDest>> MapAsync<TSource, TDest>(
+      this Task<Result<TSource>> resultTask,
+      Func<TSource, TDest> mapFunc);
+  ```
+- **Parameters:**
+  - `this Task<Result<TSource>> resultTask`: Asynchronous task returning a result.
+  - `Func<TSource, TDest> mapFunc`: Transformation delegate.
+- **Return:** `Task<Result<TDest>>`.
+- **Exceptions:** `ArgumentNullException` if `resultTask` or `mapFunc` is null.
+- **Remarks:** Uses `.ConfigureAwait(false)` internally for optimal thread dispatch.
+
+---
+
+### `ResultMappingExtensions.MapAsync` (ValueTask)
+Asynchronously projects the success value of an operation returning `ValueTask<Result<T>>`.
+
+- **Signature:**
+  ```csharp
+  public static async ValueTask<Result<TDest>> MapAsync<TSource, TDest>(
+      this ValueTask<Result<TSource>> resultTask,
+      Func<TSource, TDest> mapFunc);
+  ```
+- **Parameters:**
+  - `this ValueTask<Result<TSource>> resultTask`: Structured ValueTask returning a result.
+  - `Func<TSource, TDest> mapFunc`: Transformation delegate.
+- **Return:** `ValueTask<Result<TDest>>`.
+- **Exceptions:** `ArgumentNullException` if `mapFunc` is null.
+- **Remarks:** Ideal for high-throughput cached read paths where the task completes synchronously, eliminating heap allocation.
+
+---
+
+### `ResultMappingExtensions.MapList`
+Projects an enumerable contained in a `Result<IEnumerable<TSource>>` into an immutable `Result<IReadOnlyList<TDest>>`.
+
+- **Signature:**
+  ```csharp
+  public static Result<IReadOnlyList<TDest>> MapList<TSource, TDest>(
+      this Result<IEnumerable<TSource>> result,
+      Func<TSource, TDest> mapFunc);
+  ```
+- **Parameters:**
+  - `this Result<IEnumerable<TSource>> result`: Source result containing an enumerable.
+  - `Func<TSource, TDest> mapFunc`: Per-element transformation delegate.
+- **Return:** `Result<IReadOnlyList<TDest>>` with the projected read-only list.
+
+---
+
+## 5. Extension Package: `EricksonLopez.Mapper.Mapster`
+
+### `MapsterConverter<TSource, TDestination>` (Constructors)
+- **Constructors:**
+  - `public MapsterConverter()`: Uses global configuration `TypeAdapterConfig.GlobalSettings`.
+  - `public MapsterConverter(TypeAdapterConfig config)`: Uses an isolated, dedicated configuration instance.
+- **Remarks:** Encapsulates Mapster execution behind the standard `IConverter<TSource, TDestination>` interface.
+
+---
+
+### `MapsterConverter<TSource, TDestination>.Convert`
+- **Signature:** `public TDestination Convert(TSource source);`
+- **Parameters:** `TSource source`: Input object.
+- **Return:** `TDestination`: Produced target object.
+
+---
+
+### `MapsterMapperExtensions.UseConverter`
+Registers an `IConverter<TSource, TDestination>` within Mapster's configuration engine.
+
+- **Signature:**
+  ```csharp
+  public static TypeAdapterConfig UseConverter<TSource, TDestination>(
+      this TypeAdapterConfig config,
+      IConverter<TSource, TDestination> converter);
+  ```
+- **Parameters:**
+  - `this TypeAdapterConfig config`: Mapster configuration instance.
+  - `IConverter<TSource, TDestination> converter`: `EricksonLopez.Mapper` converter.
+- **Return:** The same `TypeAdapterConfig` instance for fluent chaining.
+
+---
+
+## 6. Generator-Emitted Extension Methods
+
+### `MapperServiceCollectionExtensions.AddGeneratedMappers`
+Automatically registers all non-static mappers and referenced converters into `IServiceCollection`.
+
+- **Signature:** `public static IServiceCollection AddGeneratedMappers(this IServiceCollection services);`
+- **Namespace:** `EricksonLopez.Mapper`
+- **Requirement:** Declare `[assembly: GenerateMapperRegistration]`.
+- **Service Lifetimes:**
+  - Non-static `[Mapper]` classes $\rightarrow$ `Singleton`.
+  - Type converters $\rightarrow$ `Transient`.
+  - `static partial class` mappers $\rightarrow$ Omitted (require no instance).
+
+---
+
+## 7. Compilation Diagnostics Catalog (ELM001–ELM018)
+
+| Code | Severity | Description | Recommended Solution |
 |---|---|---|---|
-| **ELM001** | Error | Unmapped destination member in strict mode | Add `[MapProperty]`, `[MapIgnore]`, `[MapValue]`, or matching source property |
-| **ELM002** | Error | Destination type has no accessible public constructors or factories | Add accessible constructor or `[MapFactory]` |
-| **ELM003** | Error | Unsupported type conversion | Use matching types or `[UseConverter]` |
-| **ELM004** | Error | Nullability mismatch | Use `[MapNullFallback]` |
-| **ELM005** | Error | Ambiguous property match | Disambiguate with `[MapProperty]` |
-| **ELM006** | Error | Destination type lacks supported constructor or settable properties | Add accessible constructor or setters |
-| **ELM007** | Error | Ambiguous constructor | Use `[MapFactory]` |
-| **ELM008** | Error | Mapper uses reflection or prohibited AOT APIs | Remove reflection |
-| **ELM009** | Error | Mapper uses dynamic keyword | Remove dynamic keyword |
-| **ELM010** | Error | Circular mapping dependency detected | Break recursion cycle in DTO models |
-| **ELM011** | Warning | Abstract base type with potentially uncovered derived types | Map all derived types with `[MapDerivedType]` |
-| **ELM012** | Error | `[Mapper]` class is not declared `partial` | Add `partial` keyword (`MakePartialCodeFixProvider`) |
-| **ELM013** | Error | Type does not implement `IConverter<TSrc, TDst>` | Implement `IConverter` contract |
-| **ELM014** | Error / Warn | Enum member has no destination equivalent in strict mode | Use `[MapEnumValue]` |
-| **ELM015** | Warning | Narrowing numeric conversion potential data loss | Use `[UseConverter]` or explicit cast |
-| **ELM016** | Warning | String to enum parsing runtime exception risk | Validate strings or use typed enums |
+| **ELM001** | Error | Destination property unmapped in strict mode | Add `[MapProperty]`, `[MapIgnore]`, or `[MapValue]` |
+| **ELM002** | Error | Destination type lacks accessible constructor or factory method | Add public constructor or `[MapFactory]` |
+| **ELM003** | Error | Incompatible type conversion | Ensure types are compatible or use `[UseConverter]` |
+| **ELM004** | Error | Nullability mismatch (source nullable, destination non-nullable) | Apply `[MapNullFallback]` |
+| **ELM005** | Error | Ambiguous property matching | Disambiguate with explicit `[MapProperty]` |
+| **ELM006** | Error | Missing accessible setters or init-only properties on destination | Add property setters or compatible constructor |
+| **ELM007** | Error | Ambiguous constructor on destination | Specify factory using `[MapFactory]` |
+| **ELM008** | Error | Prohibited use of reflection in mapper | Remove calls to `System.Reflection` |
+| **ELM009** | Error | Prohibited use of `dynamic` keyword | Use statically typed members |
+| **ELM010** | Error | Circular dependency detected between types | Break circular references in DTO models |
+| **ELM011** | Warning | Abstract base type with potentially uncovered derived variants | Cover all derived types using `[MapDerivedType]` |
+| **ELM012** | Error | `[Mapper]` class is not declared as `partial` | Add the `partial` modifier |
+| **ELM013** | Error | Converter specified in `[UseConverter]` does not implement `IConverter` | Implement `IConverter<TSource, TDestination>` |
+| **ELM014** | Error | Unmapped enum member in strict mode | Remap using `[MapEnumValue]` |
+| **ELM015** | Warning | Narrowing numeric conversion with risk of data loss | Use same-width types or explicit converter |
+| **ELM016** | Warning | String-to-enum parsing with risk of runtime exception | Validate strings or use strongly typed enums |
+| **ELM017** | Error | Factory method specified in `[MapFactory]` not found on destination type | Verify factory method name and accessibility |
+| **ELM018** | Warning | Duplicate `[MapProperty]` targeting the same destination member | Remove redundant attribute declaration |

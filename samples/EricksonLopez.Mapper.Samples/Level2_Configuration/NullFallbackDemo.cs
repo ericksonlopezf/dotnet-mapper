@@ -80,7 +80,7 @@ public partial class ProductCatalogMapper
     /// </summary>
     /// <param name="source">The product catalog entity to map from.</param>
     /// <returns>A new <see cref="ProductCatalogDto"/> with all fields populated.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapNullFallback("StockQuantity", "0")]
     [MapNullFallback("Price", "0m")]
     public partial ProductCatalogDto Map(ProductCatalogEntity source);

@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 In business applications, data schemas frequently have slight numeric discrepancies (e.g., `long` database ID mapped to `int` domain ID, or `double` sensor reading mapped to `float` visualization metric).
 

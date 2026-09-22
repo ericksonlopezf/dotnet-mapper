@@ -1,5 +1,11 @@
 # ADR-014: Generated Code Determinism, Readability, and Invariants
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13 (Updated 2026-08-15)
 **Deciders**: EricksonLopez.Mapper Architecture Team

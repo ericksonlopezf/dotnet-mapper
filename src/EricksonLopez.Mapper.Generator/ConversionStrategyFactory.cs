@@ -46,6 +46,9 @@ internal static class ConversionStrategyFactory
         var builtinConv = GetBuiltinConversionStrategy(unwrappedSource, unwrappedTarget, diagnostics, location, memberName, isStrict, enumStrategy, enumIgnoreCase, explicitEnumValues);
         if (builtinConv != null) return builtinConv;
 
+        bool isSourceNullable = IsNullableType(sourceType);
+        bool isTargetNullable = IsNullableType(targetType);
+
         // --- Explicit/Implicit Cast Operators on Types ---
         var castMethod = unwrappedTarget.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(m =>
             m.MethodKind == MethodKind.Conversion &&
@@ -68,50 +71,100 @@ internal static class ConversionStrategyFactory
                 2,
                 new Models.ConversionStrategy.DirectAssignment(),
                 unwrappedSource.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                isSourceNullable,
+                isTargetNullable,
+                SourceIsValueType: unwrappedSource.IsValueType);
         }
 
         // --- Strongly Typed ID / Value Object heuristic ---
-        if (unwrappedTarget is INamedTypeSymbol ntt)
+        // FIX-E (SEC-008): Guard against generic types — generic types like List<T>, Result<T>, Task<T>
+        // can spuriously match the single-property heuristic, causing incorrect ValueObjectMapping.
+        if (unwrappedTarget is INamedTypeSymbol ntt && !ntt.IsGenericType)
         {
             var properties = ntt.GetMembers().OfType<IPropertySymbol>().Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsStatic).ToList();
-            if (properties.Count == 1 && SymbolEqualityComparer.Default.Equals(properties[0].Type, unwrappedSource))
+            var valueProp = properties.FirstOrDefault(p => p.Name == "Value") ?? (properties.Count == 1 ? properties[0] : null);
+            if (valueProp != null)
             {
                 bool isReadonlyRecordStruct = ntt.IsValueType && ntt.IsRecord && ntt.IsReadOnly;
-                bool hasValueProp = properties[0].Name == "Value";
+                bool hasValueProp = valueProp.Name == "Value";
                 bool hasAttribute = ntt.GetAttributes().Any(a => RoslynInvariants.GetAttributeClassName(a) is "ValueObjectAttribute" or "ValueObject");
+                bool isEntityId = ntt.AllInterfaces.Any(i => i.Name is "IEntityId" or "IStrongId");
 
-                if (hasAttribute || hasValueProp || isReadonlyRecordStruct)
+                if (hasAttribute || hasValueProp || isReadonlyRecordStruct || isEntityId)
                 {
-                    if (ntt.Constructors.Any(c => c.Parameters.Length == 1 && SymbolEqualityComparer.Default.Equals(c.Parameters[0].Type, unwrappedSource)))
+                    if (SymbolEqualityComparer.Default.Equals(valueProp.Type, unwrappedSource))
                     {
-                        return new Models.ConversionStrategy.ValueObjectMapping(
-                            0,
-                            new Models.ConversionStrategy.DirectAssignment(),
-                            unwrappedSource.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                            unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                        if (ntt.Constructors.Any(c => c.Parameters.Length == 1 && SymbolEqualityComparer.Default.Equals(c.Parameters[0].Type, unwrappedSource)))
+                        {
+                            return new Models.ConversionStrategy.ValueObjectMapping(
+                                0,
+                                new Models.ConversionStrategy.DirectAssignment(),
+                                unwrappedSource.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                                unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                                isSourceNullable,
+                                isTargetNullable,
+                                SourceIsValueType: unwrappedSource.IsValueType);
+                        }
+                    }
+
+                    var innerStrategy = GetConversionStrategy(unwrappedSource, valueProp.Type, allMethods, diagnostics, location, memberName, isStrict, enumStrategy, enumIgnoreCase, explicitEnumValues);
+                    if (innerStrategy != null && innerStrategy is not Models.ConversionStrategy.Unsupported)
+                    {
+                        if (ntt.Constructors.Any(c => c.Parameters.Length == 1 && SymbolEqualityComparer.Default.Equals(c.Parameters[0].Type, valueProp.Type)))
+                        {
+                            return new Models.ConversionStrategy.ValueObjectMapping(
+                                0,
+                                innerStrategy,
+                                unwrappedSource.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                                unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                                isSourceNullable,
+                                isTargetNullable,
+                                SourceIsValueType: unwrappedSource.IsValueType);
+                        }
                     }
                 }
             }
         }
 
-        if (unwrappedSource is INamedTypeSymbol nst)
+        // FIX-E (SEC-008): Same guard for the source-side heuristic.
+        if (unwrappedSource is INamedTypeSymbol nst && !nst.IsGenericType)
         {
             var properties = nst.GetMembers().OfType<IPropertySymbol>().Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsStatic).ToList();
-            if (properties.Count == 1 && SymbolEqualityComparer.Default.Equals(properties[0].Type, unwrappedTarget))
+            var valueProp = properties.FirstOrDefault(p => p.Name == "Value") ?? (properties.Count == 1 ? properties[0] : null);
+            if (valueProp != null)
             {
                 bool isReadonlyRecordStruct = nst.IsValueType && nst.IsRecord && nst.IsReadOnly;
-                bool hasValueProp = properties[0].Name == "Value";
+                bool hasValueProp = valueProp.Name == "Value";
                 bool hasAttribute = nst.GetAttributes().Any(a => RoslynInvariants.GetAttributeClassName(a) is "ValueObjectAttribute" or "ValueObject");
+                bool isEntityId = nst.AllInterfaces.Any(i => i.Name is "IEntityId" or "IStrongId");
 
-                if (hasAttribute || hasValueProp || isReadonlyRecordStruct)
+                if (hasAttribute || hasValueProp || isReadonlyRecordStruct || isEntityId)
                 {
-                    var valueProp = properties[0];
-                    return new Models.ConversionStrategy.ValueObjectMapping(
-                        1,
-                        new Models.ConversionStrategy.DirectAssignment(),
-                        valueProp.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                        unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                    if (SymbolEqualityComparer.Default.Equals(valueProp.Type, unwrappedTarget))
+                    {
+                        return new Models.ConversionStrategy.ValueObjectMapping(
+                            1,
+                            new Models.ConversionStrategy.DirectAssignment(),
+                            valueProp.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                            unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                            isSourceNullable,
+                            isTargetNullable,
+                            SourceIsValueType: unwrappedSource.IsValueType);
+                    }
+
+                    var innerStrategy = GetConversionStrategy(valueProp.Type, unwrappedTarget, allMethods, diagnostics, location, memberName, isStrict, enumStrategy, enumIgnoreCase, explicitEnumValues);
+                    if (innerStrategy != null && innerStrategy is not Models.ConversionStrategy.Unsupported)
+                    {
+                        return new Models.ConversionStrategy.ValueObjectMapping(
+                            1,
+                            innerStrategy,
+                            valueProp.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                            unwrappedTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                            isSourceNullable,
+                            isTargetNullable,
+                            SourceIsValueType: unwrappedSource.IsValueType);
+                    }
                 }
             }
         }
@@ -125,7 +178,8 @@ internal static class ConversionStrategyFactory
                 elementStrategy,
                 sourceArray.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 targetArray.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                true, false, false, true, false);
+                true, false, false, true, false,
+                IsSourceNullable: isSourceNullable, IsTargetNullable: isTargetNullable);
         }
 
         // --- Dictionary types ---
@@ -160,7 +214,8 @@ internal static class ConversionStrategyFactory
                     elementStrategy,
                     namedSourceHs.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     namedTargetHashSet.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                    false, false, false, false, sourceHasCount, IsHashSet: true);
+                    false, false, false, false, sourceHasCount, IsHashSet: true,
+                    IsSourceNullable: isSourceNullable, IsTargetNullable: isTargetNullable);
             }
             else if (sourceType is IArrayTypeSymbol sourceArrHs)
             {
@@ -170,7 +225,8 @@ internal static class ConversionStrategyFactory
                     elementStrategy,
                     sourceArrHs.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     namedTargetHashSet.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                    false, false, false, true, false, IsHashSet: true);
+                    false, false, false, true, false, IsHashSet: true,
+                    IsSourceNullable: isSourceNullable, IsTargetNullable: isTargetNullable);
             }
         }
 
@@ -193,7 +249,8 @@ internal static class ConversionStrategyFactory
                     namedSource.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     namedTargetEnum.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     false, isList, isImmutableArray, namedSource.Name is "ReadOnlySpan" or "Span", sourceHasCount,
-                    IsImmutableList: isImmutableList, IsFrozenSet: isFrozenSet, SourceIsValueType: namedSource.IsValueType, SourceIsImmutableArray: namedSource.Name == "ImmutableArray");
+                    IsImmutableList: isImmutableList, IsFrozenSet: isFrozenSet, SourceIsValueType: namedSource.IsValueType, SourceIsImmutableArray: namedSource.Name == "ImmutableArray",
+                    IsSourceNullable: isSourceNullable, IsTargetNullable: isTargetNullable);
             }
             else if (sourceType is IArrayTypeSymbol sourceArrayInfo)
             {
@@ -204,7 +261,8 @@ internal static class ConversionStrategyFactory
                     sourceArrayInfo.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     namedTargetEnum.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     false, isList, isImmutableArray, true, false,
-                    IsImmutableList: isImmutableList, IsFrozenSet: isFrozenSet);
+                    IsImmutableList: isImmutableList, IsFrozenSet: isFrozenSet,
+                    IsSourceNullable: isSourceNullable, IsTargetNullable: isTargetNullable);
             }
         }
 
@@ -215,8 +273,6 @@ internal static class ConversionStrategyFactory
 
         if (mappingMethod != null)
         {
-            bool isSourceNullable = IsNullableType(sourceType);
-            bool isTargetNullable = IsNullableType(targetType);
             string methodKey = $"{mappingMethod.Name}({mappingMethod.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
             return new Models.ConversionStrategy.MapMethodInvocation(mappingMethod.Name, isSourceNullable, isTargetNullable, methodKey);
         }
@@ -248,8 +304,8 @@ internal static class ConversionStrategyFactory
             var lineSpan = location.GetLineSpan();
             diagnostics.Add(new Models.DiagnosticInfo(
                 DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.Id,
-                DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.Title.ToString(),
-                DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.MessageFormat.ToString(),
+                DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.Category,
                 (int)DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.DefaultSeverity,
                 DiagnosticDescriptors.NarrowingConversionPotentialDataLoss.IsEnabledByDefault,
@@ -284,8 +340,8 @@ internal static class ConversionStrategyFactory
                         {
                             diagnostics.Add(new Models.DiagnosticInfo(
                                 DiagnosticDescriptors.EnumMappingMissingDestinationMember.Id,
-                                DiagnosticDescriptors.EnumMappingMissingDestinationMember.Title.ToString(),
-                                DiagnosticDescriptors.EnumMappingMissingDestinationMember.MessageFormat.ToString(),
+                                DiagnosticDescriptors.EnumMappingMissingDestinationMember.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                DiagnosticDescriptors.EnumMappingMissingDestinationMember.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                                 DiagnosticDescriptors.EnumMappingMissingDestinationMember.Category,
                                 (int)DiagnosticSeverity.Error,
                                 DiagnosticDescriptors.EnumMappingMissingDestinationMember.IsEnabledByDefault,
@@ -334,8 +390,8 @@ internal static class ConversionStrategyFactory
                 {
                     diagnostics.Add(new Models.DiagnosticInfo(
                         DiagnosticDescriptors.EnumMappingMissingDestinationMember.Id,
-                        DiagnosticDescriptors.EnumMappingMissingDestinationMember.Title.ToString(),
-                        DiagnosticDescriptors.EnumMappingMissingDestinationMember.MessageFormat.ToString(),
+                        DiagnosticDescriptors.EnumMappingMissingDestinationMember.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        DiagnosticDescriptors.EnumMappingMissingDestinationMember.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         DiagnosticDescriptors.EnumMappingMissingDestinationMember.Category,
                         isStrict ? (int)DiagnosticSeverity.Error : (int)DiagnosticSeverity.Warning,
                         DiagnosticDescriptors.EnumMappingMissingDestinationMember.IsEnabledByDefault,
@@ -382,6 +438,12 @@ internal static class ConversionStrategyFactory
             return new Models.ConversionStrategy.BuiltinConversion($"({targetIntegralFqn})({{0}})");
         }
 
+        if (sourceType.TypeKind == TypeKind.Enum && dstSpec is SpecialType.System_Decimal or SpecialType.System_Double or SpecialType.System_Single)
+        {
+            string targetNumFqn = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return new Models.ConversionStrategy.BuiltinConversion($"({targetNumFqn})({{0}})");
+        }
+
         // 5. enum → string
         if (sourceType.TypeKind == TypeKind.Enum && dstSpec == SpecialType.System_String)
             return new Models.ConversionStrategy.BuiltinConversion("{0}.ToString()");
@@ -392,8 +454,8 @@ internal static class ConversionStrategyFactory
             var lineSpan = location.GetLineSpan();
             diagnostics.Add(new Models.DiagnosticInfo(
                 DiagnosticDescriptors.StringToEnumRuntimeRisk.Id,
-                DiagnosticDescriptors.StringToEnumRuntimeRisk.Title.ToString(),
-                DiagnosticDescriptors.StringToEnumRuntimeRisk.MessageFormat.ToString(),
+                DiagnosticDescriptors.StringToEnumRuntimeRisk.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                DiagnosticDescriptors.StringToEnumRuntimeRisk.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 DiagnosticDescriptors.StringToEnumRuntimeRisk.Category,
                 (int)DiagnosticDescriptors.StringToEnumRuntimeRisk.DefaultSeverity,
                 DiagnosticDescriptors.StringToEnumRuntimeRisk.IsEnabledByDefault,
@@ -435,7 +497,7 @@ internal static class ConversionStrategyFactory
         // DateOnly → DateTimeOffset
         if (sourceType is INamedTypeSymbol srcDo2 && srcDo2.ToDisplayString() == "System.DateOnly"
             && targetType is INamedTypeSymbol dstDto2 && dstDto2.ToDisplayString() == "System.DateTimeOffset")
-            return new Models.ConversionStrategy.BuiltinConversion("new global::System.DateTimeOffset(({0}).ToDateTime(global::System.TimeOnly.MinValue))");
+            return new Models.ConversionStrategy.BuiltinConversion("new global::System.DateTimeOffset(({0}).ToDateTime(global::System.TimeOnly.MinValue, global::System.DateTimeKind.Utc))");
 
         // DateTimeOffset → DateOnly
         if (sourceType is INamedTypeSymbol srcDto3 && srcDto3.ToDisplayString() == "System.DateTimeOffset"
@@ -457,42 +519,57 @@ internal static class ConversionStrategyFactory
     {
         return (source, target) switch
         {
+            // byte (System.Byte) → everything larger
             (SpecialType.System_Byte, SpecialType.System_Int16) => true,
+            (SpecialType.System_Byte, SpecialType.System_UInt16) => true,   // FIX-B: byte→ushort
             (SpecialType.System_Byte, SpecialType.System_Int32) => true,
+            (SpecialType.System_Byte, SpecialType.System_UInt32) => true,   // FIX-B: byte→uint
             (SpecialType.System_Byte, SpecialType.System_Int64) => true,
+            (SpecialType.System_Byte, SpecialType.System_UInt64) => true,   // FIX-B: byte→ulong
             (SpecialType.System_Byte, SpecialType.System_Single) => true,
             (SpecialType.System_Byte, SpecialType.System_Double) => true,
             (SpecialType.System_Byte, SpecialType.System_Decimal) => true,
+            // sbyte (System.SByte)
             (SpecialType.System_SByte, SpecialType.System_Int16) => true,
             (SpecialType.System_SByte, SpecialType.System_Int32) => true,
             (SpecialType.System_SByte, SpecialType.System_Int64) => true,
             (SpecialType.System_SByte, SpecialType.System_Single) => true,
             (SpecialType.System_SByte, SpecialType.System_Double) => true,
             (SpecialType.System_SByte, SpecialType.System_Decimal) => true,
+            // short (System.Int16)
             (SpecialType.System_Int16, SpecialType.System_Int32) => true,
             (SpecialType.System_Int16, SpecialType.System_Int64) => true,
             (SpecialType.System_Int16, SpecialType.System_Single) => true,
             (SpecialType.System_Int16, SpecialType.System_Double) => true,
             (SpecialType.System_Int16, SpecialType.System_Decimal) => true,
+            // ushort (System.UInt16)
             (SpecialType.System_UInt16, SpecialType.System_Int32) => true,
+            (SpecialType.System_UInt16, SpecialType.System_UInt32) => true, // FIX-B: ushort→uint
             (SpecialType.System_UInt16, SpecialType.System_Int64) => true,
+            (SpecialType.System_UInt16, SpecialType.System_UInt64) => true, // FIX-B: ushort→ulong
             (SpecialType.System_UInt16, SpecialType.System_Single) => true,
             (SpecialType.System_UInt16, SpecialType.System_Double) => true,
             (SpecialType.System_UInt16, SpecialType.System_Decimal) => true,
+            // int (System.Int32)
             (SpecialType.System_Int32, SpecialType.System_Int64) => true,
             (SpecialType.System_Int32, SpecialType.System_Single) => true,
             (SpecialType.System_Int32, SpecialType.System_Double) => true,
             (SpecialType.System_Int32, SpecialType.System_Decimal) => true,
+            // uint (System.UInt32)
             (SpecialType.System_UInt32, SpecialType.System_Int64) => true,
+            (SpecialType.System_UInt32, SpecialType.System_UInt64) => true, // FIX-B: uint→ulong (was MISSING — caused ELM003 false positive)
             (SpecialType.System_UInt32, SpecialType.System_Single) => true,
             (SpecialType.System_UInt32, SpecialType.System_Double) => true,
             (SpecialType.System_UInt32, SpecialType.System_Decimal) => true,
+            // long (System.Int64)
             (SpecialType.System_Int64, SpecialType.System_Single) => true,
             (SpecialType.System_Int64, SpecialType.System_Double) => true,
             (SpecialType.System_Int64, SpecialType.System_Decimal) => true,
+            // ulong (System.UInt64)
             (SpecialType.System_UInt64, SpecialType.System_Single) => true,
             (SpecialType.System_UInt64, SpecialType.System_Double) => true,
             (SpecialType.System_UInt64, SpecialType.System_Decimal) => true,
+            // float (System.Single)
             (SpecialType.System_Single, SpecialType.System_Double) => true,
             _ => false
         };

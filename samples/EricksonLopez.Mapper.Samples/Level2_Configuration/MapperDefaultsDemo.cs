@@ -98,7 +98,7 @@ public partial class LogEntryMapper
     /// </summary>
     /// <param name="source">The legacy log entry to map from.</param>
     /// <returns>A new <see cref="NormalizedLogEntryDto"/> with normalized enum values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial NormalizedLogEntryDto Map(LegacyLogEntry source);
 }
 

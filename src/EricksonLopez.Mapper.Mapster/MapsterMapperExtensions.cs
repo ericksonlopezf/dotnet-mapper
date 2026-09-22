@@ -1,5 +1,6 @@
 // Copyright © Erickson Lopez. MIT License.
 using System;
+using System.Diagnostics.CodeAnalysis;
 using EricksonLopez.Mapper;
 using Mapster;
 
@@ -10,6 +11,8 @@ namespace EricksonLopez.Mapper.Mapster;
 /// </summary>
 public static class MapsterMapperExtensions
 {
+    private const string AotWarningMessage = "Mapster uses reflection internally and is not compatible with AOT or trimmed builds.";
+
     /// <summary>
     /// Configures a <see cref="TypeAdapterConfig"/> instance to use the specified <see cref="IConverter{TSource, TDestination}"/> for mapping.
     /// </summary>
@@ -19,6 +22,8 @@ public static class MapsterMapperExtensions
     /// <param name="converter">The converter instance handling the mapping</param>
     /// <returns>The configured <see cref="TypeAdapterConfig"/> instance for method chaining.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="config"/> or <paramref name="converter"/> is <see langword="null"/></exception>
+    [RequiresUnreferencedCode(AotWarningMessage)]
+    [RequiresDynamicCode(AotWarningMessage)]
     public static TypeAdapterConfig UseConverter<TSource, TDestination>(
         this TypeAdapterConfig config,
         IConverter<TSource, TDestination> converter)

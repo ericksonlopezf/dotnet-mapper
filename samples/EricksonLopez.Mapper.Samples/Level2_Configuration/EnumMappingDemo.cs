@@ -175,7 +175,7 @@ public partial class ApiResponseMapper
     /// </summary>
     /// <param name="source">The API response entity to map from.</param>
     /// <returns>A new <see cref="ApiResponseDto"/>.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [EnumMappingStrategy(EnumMappingStrategy.ByValue)]
     public partial ApiResponseDto Map(ApiResponseEntity source);
 }
@@ -218,7 +218,7 @@ public static class EnumMappingDemo
         var apiMapper = new ApiResponseMapper();
         var responseDto = apiMapper.Map(response);
 
-        Console.WriteLine($"    Source: StatusCode={entity.TicketId} StatusCode={response.StatusCode} ({(int)response.StatusCode})");
+        Console.WriteLine($"    Source: StatusCode={response.StatusCode} ({(int)response.StatusCode})");
         Console.WriteLine($"    Target: StatusCode={responseDto.StatusCode} ({(int)responseDto.StatusCode}) — mapped by numeric value");
         Console.WriteLine($"    Message: '{responseDto.Message}'");
         Console.WriteLine();

@@ -1,5 +1,11 @@
 # ADR-010: Dependency Injection Integration Strategy
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13 (Updated 2026-08-15, Corrected 2026-08-25)
 **Deciders**: EricksonLopez.Mapper Architecture Team

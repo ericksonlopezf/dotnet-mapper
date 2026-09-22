@@ -42,13 +42,13 @@ Generated files will appear under `obj/Generated/EricksonLopez.Mapper.Generator/
 
 ### Q: Does the mapper support mutating an existing object instance (`Map(src, dest)`)?
 
-**A:** **No.** This is an explicit permanent non-goal ([ADR-D05](adr/ADR-D05-no-existing-instance-mapping.md)). Mutating existing instances breaks DDD domain invariants, creates race hazards in concurrent pipelines, and compromises NativeAOT predictability. Always instantiate clean new instances.
+**A:** **No.** This is an explicit permanent non-goal ([ADR-D05](adr/adr-d05-no-existing-instance-mapping.md)). Mutating existing instances breaks DDD domain invariants, creates race hazards in concurrent pipelines, and compromises NativeAOT predictability. Always instantiate clean new instances.
 
 ---
 
 ### Q: Does the mapper support runtime `IQueryable` expression tree rewriting (`ProjectTo<T>`)?
 
-**A:** **No.** This is an explicit permanent non-goal ([ADR-D11](adr/ADR-D11-no-iqueryable-projection.md)). Runtime expression tree rewriting breaks NativeAOT compilation and obscures SQL generation costs. Use static mappers inside standard LINQ `.Select()` projections.
+**A:** **No.** This is an explicit permanent non-goal ([ADR-D11](adr/adr-d11-no-iqueryable-projection.md)). Runtime expression tree rewriting breaks NativeAOT compilation and obscures SQL generation costs. Use static mappers inside standard LINQ `.Select()` projections.
 
 ---
 
@@ -78,3 +78,5 @@ Generated files will appear under `obj/Generated/EricksonLopez.Mapper.Generator/
 | **`ELM014`** | Error / Warn | Unmapped enum member in strict mode | Add `[MapEnumValue]` or configure `EnumMappingStrategy`. |
 | **`ELM015`** | Warning | Narrowing numeric conversion | Add explicit cast or verify precision loss is acceptable. |
 | **`ELM016`** | Warning | String to enum runtime parsing risk | Validate string before mapping or use typed enums. |
+| **`ELM017`** | Error | Factory method specified in `[MapFactory]` not found | Verify factory method name and signature on destination type. |
+| **`ELM018`** | Warning | Duplicate `[MapProperty]` targeting same destination member | Remove the redundant attribute declaration. |

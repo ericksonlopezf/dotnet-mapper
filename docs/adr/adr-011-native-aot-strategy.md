@@ -1,5 +1,11 @@
 # ADR-011: Native AOT Strategy
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13
 **Deciders**: EricksonLopez.Mapper Architecture Team

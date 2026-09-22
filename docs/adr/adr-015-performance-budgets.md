@@ -1,5 +1,11 @@
 # ADR-015: Build-Time and Runtime Performance Budgets
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13
 **Deciders**: EricksonLopez.Mapper Architecture Team

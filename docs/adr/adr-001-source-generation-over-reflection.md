@@ -1,5 +1,11 @@
 # ADR-001: Source Generation over Runtime Reflection
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13  
 **Deciders**: EricksonLopez.Mapper Architecture Team

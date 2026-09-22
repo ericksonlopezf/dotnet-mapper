@@ -81,8 +81,8 @@ internal static class MemberResolutionEngine
             var lineSpan = loc.GetLineSpan();
             diagnostics.Add(new Models.DiagnosticInfo(
                 DiagnosticDescriptors.AmbiguousPropertyMatch.Id,
-                DiagnosticDescriptors.AmbiguousPropertyMatch.Title.ToString(),
-                DiagnosticDescriptors.AmbiguousPropertyMatch.MessageFormat.ToString(),
+                DiagnosticDescriptors.AmbiguousPropertyMatch.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                DiagnosticDescriptors.AmbiguousPropertyMatch.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 DiagnosticDescriptors.AmbiguousPropertyMatch.Category,
                 (int)DiagnosticDescriptors.AmbiguousPropertyMatch.DefaultSeverity,
                 DiagnosticDescriptors.AmbiguousPropertyMatch.IsEnabledByDefault,

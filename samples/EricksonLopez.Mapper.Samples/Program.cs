@@ -47,6 +47,8 @@ public static class Program
         CollectionsDemo.Run();
         BuiltinConversionsDemo.Run();  // enum/Guid/DateTime/numeric
         CollectionTypesDemo.Run();     // Array/ImmutableArray/HashSet
+        HierarchyFlatteningDemo.Run(); // [MapProperty("A.B.C", "Dest")] deep dot-path flattening
+
 
         // --- Level 4: Advanced Integration ---
         AdvancedDemo.Run();

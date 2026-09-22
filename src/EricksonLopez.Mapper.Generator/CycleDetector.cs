@@ -18,6 +18,20 @@ internal static class CycleDetector
             var deps = new List<string>();
             ExtractMethodDependencies(m.Construction, deps);
             foreach (var mem in m.Members) ExtractMethodDependencies(mem.Strategy, deps);
+            foreach (var d in m.DerivedTypes)
+            {
+                if (!string.IsNullOrEmpty(d.MethodName))
+                {
+                    if (!string.IsNullOrEmpty(d.SourceType))
+                    {
+                        deps.Add($"{d.MethodName}({d.SourceType})");
+                    }
+                    else
+                    {
+                        deps.Add(d.MethodName!);
+                    }
+                }
+            }
 
             string key = GetMethodKey(m);
             adjacencyList[key] = deps;
@@ -53,8 +67,8 @@ internal static class CycleDetector
                 {
                     diagnostics.Add(new Models.DiagnosticInfo(
                         DiagnosticDescriptors.CircularReference.Id,
-                        DiagnosticDescriptors.CircularReference.Title.ToString(),
-                        DiagnosticDescriptors.CircularReference.MessageFormat.ToString(),
+                        DiagnosticDescriptors.CircularReference.Title.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        DiagnosticDescriptors.CircularReference.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         DiagnosticDescriptors.CircularReference.Category,
                         (int)DiagnosticDescriptors.CircularReference.DefaultSeverity,
                         DiagnosticDescriptors.CircularReference.IsEnabledByDefault,

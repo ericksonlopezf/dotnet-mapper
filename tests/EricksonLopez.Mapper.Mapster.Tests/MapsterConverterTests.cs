@@ -222,6 +222,35 @@ public sealed class MapsterConverterTests
         returnedConfig.Should().BeSameAs(config);
     }
 
+    [Fact]
+    public void AotAttributes_WhenMapsterConverterConstructorsInspected_ShouldHaveAotWarningAttributes()
+    {
+        var type = typeof(MapsterConverter<SourceDto, DestViewModel>);
+        var ctors = type.GetConstructors();
+
+        foreach (var ctor in ctors)
+        {
+            var unreferencedAttr = ctor.GetCustomAttributes(typeof(System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute), false);
+            unreferencedAttr.Should().NotBeEmpty("because MapsterConverter constructors must warn trimming/AOT users");
+
+            var dynamicAttr = ctor.GetCustomAttributes(typeof(System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute), false);
+            dynamicAttr.Should().NotBeEmpty("because MapsterConverter constructors must warn dynamic code users");
+        }
+    }
+
+    [Fact]
+    public void AotAttributes_WhenUseConverterMethodInspected_ShouldHaveAotWarningAttributes()
+    {
+        var method = typeof(MapsterMapperExtensions).GetMethod(nameof(MapsterMapperExtensions.UseConverter));
+        method.Should().NotBeNull();
+
+        var unreferencedAttr = method!.GetCustomAttributes(typeof(System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute), false);
+        unreferencedAttr.Should().NotBeEmpty("because UseConverter must warn trimming/AOT users");
+
+        var dynamicAttr = method.GetCustomAttributes(typeof(System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute), false);
+        dynamicAttr.Should().NotBeEmpty("because UseConverter must warn dynamic code users");
+    }
+
     private sealed class CustomUpperConverter : IConverter<SourceDto, DestViewModel>
     {
         public DestViewModel Convert(SourceDto source)

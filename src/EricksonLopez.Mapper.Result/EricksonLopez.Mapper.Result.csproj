@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Description>Result monad mapping extensions for EricksonLopez.Mapper. Enables functional projection of Result&lt;T&gt; and collections.</Description>
-    <PackageTags>$(CommonPackageTags);result;result-pattern;functional-programming;railway-oriented-programming;error-handling;monad;extensions</PackageTags>
+    <PackageTags>$(CommonPackageTags);mapper;mapping;result;result-pattern;functional-programming;railway-oriented-programming;error-handling;monad;extensions;native-aot;aot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -444,7 +444,7 @@ public enum MySampleEnum { A = 1 }
 
         // DateOnly -> DateTimeOffset
         var s5 = ConversionStrategyFactory.GetConversionStrategy(doType, dto, new List<IMethodSymbol>(), diagnostics, Location.None, "P", isStrict: true);
-        ((ConversionStrategy.BuiltinConversion)s5).ExpressionTemplate.Should().Be("new global::System.DateTimeOffset(({0}).ToDateTime(global::System.TimeOnly.MinValue))");
+        ((ConversionStrategy.BuiltinConversion)s5).ExpressionTemplate.Should().Be("new global::System.DateTimeOffset(({0}).ToDateTime(global::System.TimeOnly.MinValue, global::System.DateTimeKind.Utc))");
 
         // DateTimeOffset -> DateOnly
         var s6 = ConversionStrategyFactory.GetConversionStrategy(dto, doType, new List<IMethodSymbol>(), diagnostics, Location.None, "P", isStrict: true);

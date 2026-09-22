@@ -91,7 +91,7 @@ public partial class TemporalMapper
         output.Should().Contain("DateOnlyToDt = (source.Do1).ToDateTime(global::System.TimeOnly.MinValue)");
         output.Should().Contain("DtToDto = new global::System.DateTimeOffset(source.Dt2)");
         output.Should().Contain("DtoToDt = (source.Dto1).DateTime");
-        output.Should().Contain("DateOnlyToDto = new global::System.DateTimeOffset((source.Do2).ToDateTime(global::System.TimeOnly.MinValue))");
+        output.Should().Contain("DateOnlyToDto = new global::System.DateTimeOffset((source.Do2).ToDateTime(global::System.TimeOnly.MinValue, global::System.DateTimeKind.Utc))");
         output.Should().Contain("DtoToDateOnly = global::System.DateOnly.FromDateTime((source.Dto2).DateTime)");
     }
 

@@ -3,7 +3,12 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <Description>Mapster integration adapter for EricksonLopez.Mapper. Bridges Mapster's configuration and runtime adapter engine with the unified EricksonLopez.Mapper abstraction contracts.</Description>
-    <PackageTags>$(CommonPackageTags);mapster;adapter;bridge;interop;migration;compatibility;type-adapter</PackageTags>
+    <PackageTags>$(CommonPackageTags);mapper;mapping;mapster;adapter;bridge;interop;migration;type-adapter;compatibility</PackageTags>
+    <!-- AOT-002: Mapster uses reflection internally. This package is explicitly NOT AOT-compatible.
+         [RequiresUnreferencedCode] and [RequiresDynamicCode] on MapsterConverter document this.
+         Setting IsAotCompatible=false prevents false IL3050 cascade errors in consuming test projects. -->
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
