@@ -78,7 +78,7 @@ public partial class PaymentMapper
     /// </summary>
     /// <param name="source">The payment transaction entity to map from.</param>
     /// <returns>A new <see cref="PaymentTransactionDto"/> with the currency code normalized to uppercase.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapFactory("Create")]
     public partial PaymentTransactionDto MapTransaction(PaymentTransactionEntity source);
 }

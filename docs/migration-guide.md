@@ -22,7 +22,7 @@ Delete all profile classes inheriting from `Profile`.
 Install the umbrella package:
 
 ```bash
-dotnet add package EricksonLopez.Mapper --version 1.0.0
+dotnet add package EricksonLopez.Mapper --version 2.0.0
 ```
 
 ### Step 3: Convert Mapping Profiles to `[Mapper]` Partial Classes
@@ -107,7 +107,7 @@ dotnet remove package Mapster.DependencyInjection
 ### Step 2: Add EricksonLopez.Mapper
 
 ```bash
-dotnet add package EricksonLopez.Mapper --version 1.0.0
+dotnet add package EricksonLopez.Mapper --version 2.0.0
 ```
 
 ### Step 3: Replace `Adapt<T>()` with Generated Methods
@@ -141,6 +141,6 @@ var dto = OrderMapper.Map(order);
 | **Native AOT Trimming Safety** | ❌ Trimming issues | ⚠️ Partial | ✅ 100% Zero-warning AOT |
 | **Execution Performance** | 24.90 ns (Reflection) | 8.44 ns (Dynamic IL) | **2.80 ns** (Static Pure C#) |
 | **Heap Allocations** | Allocates delegates & closures | Modest allocations | **32 B** (Object creation only) |
-| **Implicit Flattening** | ✅ Automatic | ✅ Configurable | ❌ Excluded by design ([ADR-D03](adr/ADR-D03-no-automatic-flattening.md)) |
-| **In-Place Mutation (`Map(src, dest)`)** | ✅ Supported | ✅ Supported | ❌ Excluded by design ([ADR-D05](adr/ADR-D05-no-existing-instance-mapping.md)) |
-| **`IQueryable.ProjectTo<T>()`** | ✅ Supported | ✅ Supported | ❌ Excluded by design ([ADR-D11](adr/ADR-D11-no-iqueryable-projection.md)) |
+| **Implicit Flattening** | ✅ Automatic | ✅ Configurable | ❌ Excluded by design ([ADR-D03](adr/adr-d03-no-automatic-flattening.md)) |
+| **In-Place Mutation (`Map(src, dest)`)** | ✅ Supported | ✅ Supported | ❌ Excluded by design ([ADR-D05](adr/adr-d05-no-existing-instance-mapping.md)) |
+| **`IQueryable.ProjectTo<T>()`** | ✅ Supported | ✅ Supported | ❌ Excluded by design ([ADR-D11](adr/adr-d11-no-iqueryable-projection.md)) |

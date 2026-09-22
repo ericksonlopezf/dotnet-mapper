@@ -28,7 +28,7 @@ public partial class ExtensionsMapper
     /// <summary>Maps an <see cref="OrderEntity"/> to an <see cref="OrderDto"/>.</summary>
     /// <param name="source">The order entity to map from.</param>
     /// <returns>A new <see cref="OrderDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial OrderDto Map(OrderEntity source);
 }
 

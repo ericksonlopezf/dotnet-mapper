@@ -37,7 +37,7 @@ public partial class ScalabilityMapper
     /// <summary>Maps a <see cref="LargePayloadEntity"/> to a <see cref="LargePayloadDto"/>.</summary>
     /// <param name="source">The entity to map from.</param>
     /// <returns>A new <see cref="LargePayloadDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial LargePayloadDto Map(LargePayloadEntity source);
 }
 

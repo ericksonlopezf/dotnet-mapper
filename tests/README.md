@@ -96,17 +96,14 @@ When generated code changes are intentional and verified:
 
 To verify assertion effectiveness and prevent surviving mutants:
 
-### Unified Execution Script (`run-stryker.ps1`)
-The repository includes `run-stryker.ps1` to orchestrate Stryker execution across all components using declarative thresholds:
+### Unified Execution Script (`scripts/run-stryker.ps1`)
+The repository includes `scripts/run-stryker.ps1` to orchestrate Stryker execution across all components using declarative thresholds:
 ```powershell
 # Full local execution across all packages:
-./run-stryker.ps1
+pwsh ./scripts/run-stryker.ps1
 
-# Incremental execution against a base branch (fast for PRs):
-./run-stryker.ps1 -Since "origin/main"
-
-# Fail-fast mode:
-./run-stryker.ps1 -FailFast
+# Execution with custom configuration file or mutation level:
+pwsh ./scripts/run-stryker.ps1 -Config "stryker-config.json" -MutationLevel "Standard"
 ```
 
 ### Component Quality Thresholds
@@ -124,7 +121,8 @@ The repository includes `run-stryker.ps1` to orchestrate Stryker execution acros
 
 ## 5. Target Framework Architecture (TFMs)
 
-- **`EricksonLopez.Mapper.Abstractions` and `EricksonLopez.Mapper`**: Multi-TFM (`net8.0;net9.0;net10.0`) supporting consumers on all modern .NET releases.
+- **`EricksonLopez.Mapper.Abstractions`**: Multi-TFM (`netstandard2.0;net8.0;net9.0;net10.0`).
+- **`EricksonLopez.Mapper`**: Multi-TFM (`net8.0;net9.0;net10.0`) supporting consumers on all modern .NET releases.
 - **`EricksonLopez.Mapper.Abstractions.Tests` and `IntegrationTests`**: Compile and execute across all 3 TFMs (`net8.0`, `net9.0`, `net10.0`) to guarantee binary and runtime compatibility.
 - **`EricksonLopez.Mapper.Generator` and `EricksonLopez.Mapper.Analyzers`**: Target `netstandard2.0` (Roslyn compiler host compatibility requirement). Test projects target `net8.0`.
 

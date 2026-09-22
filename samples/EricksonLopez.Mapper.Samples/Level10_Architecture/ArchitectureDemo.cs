@@ -40,7 +40,7 @@ public partial class UserProfileMapper
     /// </summary>
     /// <param name="source">The user entity to map from.</param>
     /// <returns>A new <see cref="UserResponse"/> containing only publicly safe fields.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapIgnoreSource(nameof(UserEntity.PasswordHash))]
     public partial UserResponse Map(UserEntity source);
 }

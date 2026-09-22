@@ -1,5 +1,11 @@
 # ADR-009: Member Resolution and Mapping Contract
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13
 **Deciders**: EricksonLopez.Mapper Architecture Team

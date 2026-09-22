@@ -28,7 +28,7 @@ Brief description of the changes in this PR.
 - [ ] My code follows the project's code standards
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] All new and existing tests pass (`dotnet test EricksonLopez.Mapper.slnx`)
-- [ ] The mutation score has not decreased below the threshold (`pwsh ./run-stryker.ps1`)
+- [ ] The mutation score has not decreased below the threshold (`pwsh ./scripts/run-stryker.ps1`)
 - [ ] NativeAOT compatibility is maintained (zero `IL2026` / `IL3050` warnings)
 - [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org) format
 - [ ] I have updated documentation as needed (API Reference, XML docstrings, ADR if architectural)

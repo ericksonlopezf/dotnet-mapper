@@ -6,7 +6,8 @@
 
 | Version | Supported          | Security Patch SLA |
 | :--- | :--- | :--- |
-| **1.x** | :white_check_mark: | Best effort (high priority) |
+| **2.x** | :white_check_mark: | Active (high priority) |
+| **1.x** | :white_check_mark: | Maintenance (security patches only) |
 | **< 1.0** | :x: | None (Pre-release) |
 
 ---

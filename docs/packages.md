@@ -37,7 +37,8 @@ graph TD
 ```
 
 - **Runtime Footprint**: Installing `EricksonLopez.Mapper` introduces only `EricksonLopez.Mapper.Abstractions` to the consumer runtime. The generator and analyzers are stripped from output binaries.
-- **Zero Reflection Guarantee**: All 5 runtime packages (`EricksonLopez.Mapper`, `Abstractions`, `DomainPrimitives`, `Mapster`, `Result`) are compiled with `IsAotCompatible=true` and `IsTrimmable=true`. The `Generator` and `Analyzers` packages set `IsAotCompatible=false` and `IsTrimmable=false` **intentionally** — they target `netstandard2.0` and execute exclusively at build time inside the Roslyn compiler host; they are never included in the consumer's output binary.
+- **Zero Reflection & AOT Guarantee**: 4 of the 5 runtime packages (`EricksonLopez.Mapper`, `Abstractions`, `DomainPrimitives`, and `Result`) are compiled with `IsAotCompatible=true` and `IsTrimmable=true`. The `Generator` and `Analyzers` packages set `IsAotCompatible=false` and `IsTrimmable=false` **intentionally** — they target `netstandard2.0` and execute exclusively at build time inside the Roslyn compiler host.
+- **Mapster Adapter Boundary (AOT-002)**: The `EricksonLopez.Mapper.Mapster` package explicitly sets `IsAotCompatible=false` and `IsTrimmable=false` because Mapster utilizes reflection and dynamic code internally. Its converters are annotated with `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]`.
 
 ---
 
@@ -49,26 +50,43 @@ Dependency versions are declared centrally in `Directory.Packages.props`:
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Roslyn Tooling -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
-
-    <!-- Core Integrations -->
-    <PackageVersion Include="EricksonLopez.DomainPrimitives.Abstractions" Version="1.0.0" />
-    <PackageVersion Include="EricksonLopez.Result" Version="1.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
-    <PackageVersion Include="Mapster" Version="10.0.11" />
-
+    <!-- Core & Integrations -->
+    <PackageVersion Include="EricksonLopez.DomainPrimitives.Abstractions" Version="2.0.0" />
+    <PackageVersion Include="EricksonLopez.Result" Version="2.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+    <!-- SourceLink -->
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400" />
+    <!-- Analyzers & Generators -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2-beta1.22271.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.XUnit" Version="1.1.2-beta1.22271.1" />
     <!-- Testing & Benchmarks -->
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="coverlet.MTP" Version="10.0.1" />
+    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
+    <PackageVersion Include="AutoFixture" Version="4.18.1" />
+    <PackageVersion Include="AutoFixture.Xunit2" Version="4.18.1" />
+    <PackageVersion Include="FsCheck.Xunit" Version="3.4.0" />
+    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
+    <PackageVersion Include="Verify.Xunit" Version="31.12.5" />
+    <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.11" />
+    <!-- Benchmarks -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="AutoMapper" Version="16.2.0" />
+    <PackageVersion Include="Mapster" Version="10.0.12" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
   </ItemGroup>
 </Project>
 ```
@@ -84,7 +102,7 @@ Dependency versions are declared centrally in `Directory.Packages.props`:
 | `EricksonLopez.Mapper.Generator` | ✅ Yes (Roslyn 4.8+) | ✅ Yes | ✅ Yes | N/A (Build-time) | N/A (Build-time) |
 | `EricksonLopez.Mapper.Analyzers` | ✅ Yes (Roslyn 4.8+) | ✅ Yes | ✅ Yes | N/A (Build-time) | N/A (Build-time) |
 | `EricksonLopez.Mapper.DomainPrimitives` | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| `EricksonLopez.Mapper.Mapster` | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| `EricksonLopez.Mapper.Mapster` | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No (Reflection) | ❌ No (Reflection) |
 | `EricksonLopez.Mapper.Result` | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
 
 ---

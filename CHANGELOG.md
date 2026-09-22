@@ -5,9 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
----
-
 ## [Unreleased]
+
+## [2.0.0] - 2026-09-22
+
+### 💥 Breaking Changes
+
+- **BC-001: Native AOT & Trimming Revocation on `EricksonLopez.Mapper.Mapster`**
+  - **Component**: `EricksonLopez.Mapper.Mapster` (`EricksonLopez.Mapper.Mapster.csproj`, `MapsterConverter.cs`, `MapsterMapperExtensions.cs`)
+  - **Previous State**: The package inherited `<IsAotCompatible>true</IsAotCompatible>` and `<IsTrimmable>true</IsTrimmable>` from `Directory.Build.props`. `MapsterConverter` constructors and `MapsterMapperExtensions.UseConverter` had no trimming or AOT warning attributes.
+  - **Current State**: Package declares `<IsAotCompatible>false</IsAotCompatible>` and `<IsTrimmable>false</IsTrimmable>`. Decorated public constructors and `UseConverter` extension with `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]`.
+  - **Impact**: Consuming projects compiling with `<PublishAot>true</PublishAot>` or `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` will fail compilation with analyzer errors `IL2026` and `IL3050`. Projects requiring end-to-end Native AOT compliance cannot consume this package.
+  - **Migration**: For Native AOT scenarios, replace `MapsterConverter` with source-generated mappers using `[Mapper]` and compile-time generated `IConverter<TSource, TDestination>`. If Mapster dynamic mapping is required in non-AOT projects with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, suppress warnings `IL2026` and `IL3050` at the registration call site.
+
+- **BC-002: Built-in `DateOnly → DateTimeOffset` Mapping Forces UTC `DateTimeKind.Utc`**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`ConversionStrategyFactory.cs`)
+  - **Previous State**: The built-in conversion emitted `new DateTimeOffset(source.Date.ToDateTime(TimeOnly.MinValue))`. Because `DateTimeKind` was `Unspecified`, `DateTimeOffset` resolved the offset using the host machine's local timezone offset (e.g. `-04:00`, `+02:00`).
+  - **Current State**: Emits `new DateTimeOffset(source.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc))`. The mapped `DateTimeOffset` is now guaranteed to have offset `+00:00` (UTC).
+  - **Impact**: Runtime behavioral breaking change. Applications running in non-UTC environments will observe different offset values and instant representations. Database persistence, JSON serialization (ISO 8601 UTC representation), and equality checks asserting local offsets will produce different results.
+  - **Migration**: If local timezone representation was expected, implement a custom converter via `IConverter<DateOnly, DateTimeOffset>` or use `[MapValue]` to explicitly specify timezone conversion using `TimeZoneInfo`.
+
+- **BC-003: `ELM017` Compile-Time Error for Unresolved `[MapFactory]` Methods**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`Diagnostics.cs`, `MapperGenerator.cs`)
+  - **Previous State**: If `[MapFactory("MethodName")]` referenced a method name that did not exist on the destination type or lacked matching accessibility/parameters, the generator silently ignored the attribute and fell back to public constructors.
+  - **Current State**: The generator emits compile-time error `ELM017` (`MapFactoryMethodNotFound`) and halts mapping code generation for that method.
+  - **Impact**: Compile-time breaking change. Codebases that had invalid, mistyped, or non-static `[MapFactory]` attribute arguments that previously compiled via fallback constructors will now fail compilation.
+  - **Migration**: Ensure the factory method specified in `[MapFactory]` is a `public static` method on the destination type returning the destination type. Use `nameof(DestinationType.FactoryMethod)` to ensure compile-time symbol accuracy. If constructor instantiation was intended, remove the `[MapFactory]` attribute.
+
+- **BC-004: `ELM012` Compiler Error Extended to Non-Partial `[Mapper]` Interfaces**
+  - **Component**: `EricksonLopez.Mapper.Analyzers` (`MapperAnalyzer.cs`)
+  - **Previous State**: `MapperAnalyzer` only inspected `ClassDeclarationSyntax` for the `partial` modifier. Interfaces decorated with `[Mapper]` without `partial` were ignored by the analyzer.
+  - **Current State**: `MapperAnalyzer` now inspects `InterfaceDeclarationSyntax` and reports compile-time error `ELM012` (`MustBePartial`) if the interface lacks the `partial` modifier.
+  - **Impact**: Compile-time breaking change. Any project declaring `[Mapper] public interface IMyMapper` without the `partial` keyword will fail compilation with error `ELM012`.
+  - **Migration**: Add the `partial` modifier to all interface declarations decorated with `[Mapper]`, e.g., `[Mapper] public partial interface IMyMapper`.
+
+- **BC-005: Source Generator HintName File Naming Includes Namespace (`GEN-003`)**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`MapperGenerator.cs`)
+  - **Previous State**: The generator registered source outputs using simple class names: `ClassName.g.cs`.
+  - **Current State**: The generator prefixes the hint name with the sanitized namespace: `{Namespace}_{ClassName}.g.cs` (or `{ClassName}.g.cs` only when declared in the global namespace).
+  - **Impact**: Integration and configuration breaking change. Projects using `<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>` with build targets, CI analyzers, snapshot verification, or gitignore rules targeting specific `ClassName.g.cs` paths will break because the output file path on disk has changed.
+  - **Migration**: Update MSBuild scripts, CI pipelines, snapshot test paths, and custom build rules to reference `{Namespace}_{ClassName}.g.cs` instead of `{ClassName}.g.cs`.
+
+- **BC-006: `CycleDetector` Cycle Enforcement Extended to Polymorphic `[MapDerivedType]` Mappings (`ELM010`)**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`CycleDetector.cs`)
+  - **Previous State**: `CycleDetector` only inspected constructor parameters and property member strategies. Polymorphic dispatch methods defined in `[MapDerivedType]` were not checked in the dependency graph.
+  - **Current State**: `CycleDetector` now builds dependency edges for all polymorphic target methods referenced in `[MapDerivedType]`. If a circular dependency chain exists across derived type mappings, `ELM010` (`CircularMappingDependency`) is emitted as a compile error.
+  - **Impact**: Compile-time breaking change. Any polymorphic mapping containing circular graph dependencies that previously compiled will now fail compilation with error `ELM010`.
+  - **Migration**: Refactor cyclic polymorphic hierarchies into unidirectional mapping flows or resolve cycle nodes using custom `IConverter<TSource, TDestination>` implementations.
+
+- **BC-007: `ELM018` Warning for Duplicate `[MapProperty]` Destination Targets**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`Diagnostics.cs`, `MapperGenerator.cs`)
+  - **Previous State**: Multiple `[MapProperty]` attributes targeting the same destination property were silently overwritten, with the last attribute taking precedence without notice.
+  - **Current State**: The generator emits compile-time warning `ELM018` (`DuplicateMapPropertyDestination`) when a destination member is targeted multiple times.
+  - **Impact**: Compile-time breaking in projects configured with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`. The duplicate attribute was previously shadowed silently; now it breaks builds under strict warning policies.
+  - **Migration**: Remove redundant or shadowed `[MapProperty]` attributes targeting the same destination property so that only a single unambiguous mapping declaration remains.
+
+- **BC-008: Nullable Target Collection Initialization Returns `null` Instead of Empty Instance**
+  - **Component**: `EricksonLopez.Mapper.Generator` (`CodeEmitter.cs`, `Models/ConversionStrategy.cs`)
+  - **Previous State**: For array (`T[]?`) and immutable collection (`ImmutableArray<T>?`, `ImmutableList<T>?`) destination properties declared as nullable, generated mapping code unconditionally initialized the target variable to `Array.Empty<T>()` or `ImmutableArray.Empty`.
+  - **Current State**: When the target collection property is nullable (`IsTargetNullable = true`), generated code initializes the variable to `null`. Similarly, value object mapping wraps/unwraps with ternary null checks when both source and destination are nullable.
+  - **Impact**: Runtime behavioral breaking change. Consumers who relied on nullable collection properties defaulting to non-null empty collections will now observe `null` values when source collections are null/unmapped, potentially causing `NullReferenceException` in un-guarded consumer code.
+  - **Migration**: Ensure consumer code accessing nullable collections performs appropriate null-coalescing or null-checking (`mapped.Items ?? []`), or change destination property declarations to non-nullable collections (`T[]` / `List<T>`).
+
+### ✨ Added
+- `ELM017` (Error): Factory method specified in `[MapFactory]` was not found on destination type.
+- `ELM018` (Warning): Duplicate `[MapProperty]` targeting the same destination member.
+- Support for unsigned and widening numeric conversions: `uint → ulong`, `byte → ushort/uint/ulong`, `ushort → uint/ulong`.
+- Support for `enum → decimal`, `enum → double`, and `enum → float` conversions.
+- Support for mapper types declared in the global (empty) namespace without emitting invalid C# syntax.
+
+### 🐛 Bug Fixes
+- **di:** escape C# keywords and support global namespace mappers in `DependencyInjectionEmitter` (`services.AddSingleton(...)`).
+- **generator:** prevent hint name collision in source generator by qualifying emitted file names with namespace (`GEN-003`).
+- **analyzers:** enforce `partial` modifier on `[Mapper]` interface declarations (`ELM012`).
+- **generator:** prevent silent constructor fallback when `[MapFactory]` method does not exist (`ELM017`).
+- **generator:** prevent silent overwrite of duplicate `[MapProperty]` attributes by warning developer (`ELM018`).
 
 ---
 

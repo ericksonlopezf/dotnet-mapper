@@ -544,8 +544,11 @@ public class CodeEmitterTests
     }
 
     [Fact]
-    public void GenerateSourceCode_WhenEmptyNamespace_ShouldFallbackToUnderscoreNamespace()
+    public void GenerateSourceCode_WhenEmptyNamespace_ShouldEmitClassWithoutNamespaceWrapper()
     {
+        // FIX-F (GEN-009): Before this fix, an empty namespace produced invalid C# 'namespace  { }'
+        // or the underscore fallback 'namespace _ { }'. Now we correctly omit the namespace wrapper
+        // entirely, placing the class in the global namespace — which is valid C#.
         var method = TestDataBuilders.CreateMethod("Map")
             .WithSourceType("Source")
             .WithTargetType("Dest")
@@ -559,7 +562,11 @@ public class CodeEmitterTests
             .Build();
 
         var code = CodeEmitter.GenerateSourceCode(typeMapping);
-        code.Should().Contain("namespace _");
+        // Must NOT emit a namespace block — the class is in the global namespace
+        code.Should().NotContain("namespace _",
+            "because FIX-F omits the namespace wrapper for empty/global namespace classes instead of falling back to '_'");
+        code.Should().NotContain("namespace ",
+            "because no namespace keyword should be emitted for global-namespace classes");
         code.Should().Contain("public partial class GlobalMapper");
         AssertValidSyntax(code);
     }

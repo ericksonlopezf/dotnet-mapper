@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 The framework aims for 100% test coverage across Line, Branch, Method, and Mutation metrics. While `EricksonLopez.Mapper.Abstractions` achieves full compliance, the compiler-integrated components (Roslyn Analyzers and Source Generators) present specific practical challenges during automated mutation testing via Stryker.
 

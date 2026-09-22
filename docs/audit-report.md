@@ -4,6 +4,9 @@
 > **Auditors**: Principal .NET Architect · C# Compiler Engineer · Roslyn Expert · Source Generator Expert · Native AOT Specialist · Performance Engineer · Mapping Library Architect · API Design Expert · DDD Architect · Clean Architecture Expert · NuGet/OSS Maintainer · BenchmarkDotNet Expert · .NET Runtime Expert  
 > **Source of Truth**: Source code, test suites, snapshots, ADRs, and benchmarks. (The README reflects design intent, not baseline implementation).
 
+> [!NOTE]
+> **Historical Baseline Document**: This report documents the initial architectural audit performed on 2026-08-14. All remediation items (modular generator pipeline, full enum strategies, Native AOT test gates, diagnostics ELM001–ELM018) were subsequently implemented, verified, and shipped in the v1.0.0 release.
+
 ---
 
 ## EXECUTIVE SUMMARY

@@ -1,5 +1,11 @@
 # ADR-D07: Custom Naming Conventions Rejected
 
+## Status
+Rejected
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13
 
