@@ -36,7 +36,7 @@ public partial class ProductMapper
     /// <summary>Maps a <see cref="ProductEntity"/> to a <see cref="ProductDto"/>.</summary>
     /// <param name="source">The product entity to map from.</param>
     /// <returns>A new immutable <see cref="ProductDto"/> populated via its primary constructor.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial ProductDto Map(ProductEntity source);
 }
 

@@ -34,9 +34,9 @@ This inventory is the canonical reference for all public APIs in the `EricksonLo
 | **Responsibility** | Explicitly remaps a source property to a destination property with a different name. |
 | **Dependencies** | None. Combined with `[Mapper]`. |
 | **Parameters** | `string sourceName`, `string destinationName` |
-| **Use Cases** | DTOs with different naming conventions than entities. Nested property mapping (`"Address.City"`, `"City"`). |
-| **Complexity** | Basic |
-| **Sample** | ✅ `Level2_Configuration/ConfigurationDemo.cs`, `Level3_RealWorld/BuiltinConversionsDemo.cs` |
+| **Use Cases** | DTOs with different naming conventions than entities. Deep dot-path hierarchy flattening (`"Customer.Address.City"` → `"CityName"`). |
+| **Complexity** | Basic (rename) / Intermediate (dot-path) |
+| **Sample** | ✅ `Level2_Configuration/ConfigurationDemo.cs`, `Level3_RealWorld/BuiltinConversionsDemo.cs`, `Level3_RealWorld/HierarchyFlatteningDemo.cs` (dot-path) |
 
 ### `MapIgnoreAttribute`
 

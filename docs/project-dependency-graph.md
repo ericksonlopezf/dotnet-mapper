@@ -35,7 +35,7 @@ graph TD
 
     subgraph "Benchmarks & Samples"
         BENCH["EricksonLopez.Mapper.Benchmarks\nnet10.0"]
-        SAMPLE["EricksonLopez.Mapper.Sample\nnet10.0"]
+        SAMPLE["EricksonLopez.Mapper.Samples\nnet10.0"]
     end
 
     %% Consumer references
@@ -82,28 +82,35 @@ All third-party NuGet package versions are centrally managed in `Directory.Packa
 
 | Package ID | Central Version | Consumed By | Purpose |
 |---|---|---|---|
-| `Microsoft.CodeAnalysis.CSharp` | `4.12.0` | `Generator`, `Analyzers` | Roslyn compiler syntax and semantic model APIs |
-| `Microsoft.CodeAnalysis.CSharp.Workspaces` | `4.12.0` | `Analyzers` | Roslyn workspace and CodeFixProvider APIs |
-| `Microsoft.CodeAnalysis.PublicApiAnalyzers` | `3.3.4` | `Abstractions` | Enforces `PublicAPI.Shipped.txt` public surface invariant |
-| `Microsoft.Extensions.DependencyInjection` | `9.0.2` | `Sample` | ASP.NET Core DI container abstractions |
-| `Microsoft.NET.Test.Sdk` | `17.14.1` | Test projects | MSBuild test execution target harness |
-| `xunit` | `2.9.3` | Test projects | Primary testing framework |
-| `xunit.runner.visualstudio` | `3.0.2` | Test projects | Visual Studio / VSTest test runner adapter |
-| `coverlet.collector` | `6.0.4` | Test projects | Cross-platform XPlat code coverage data collector |
-| `AwesomeAssertions` | `9.5.0` | Test projects | Fluent assertion library |
-| `NSubstitute` | `6.1.0` | `Mapper.Tests` | Dynamic mocking framework for unit testing |
-| `AutoFixture` | `4.18.1` | `Mapper.Tests` | Automated anonymous test fixture generation |
-| `AutoFixture.Xunit2` | `4.18.1` | `Mapper.Tests` | xUnit 2 data theory attribute integration |
-| `FsCheck.Xunit` | `3.3.4` | `Mapper.Tests` | Property-based testing support |
-| `Verify.SourceGenerators` | `2.3.0` | `Generator.Tests` | Roslyn source generator snapshot verification |
-| `Verify.Xunit` | `26.4.0` | `Generator.Tests` | Snapshot assertion engine for xUnit |
-| `Basic.Reference.Assemblies.Net80` | `1.4.5` | `Generator.Tests` | In-memory reference metadata for Roslyn compilation tests |
-| `BenchmarkDotNet` | `0.14.0` | `Benchmarks` | Benchmarking framework |
-| `AutoMapper` | `13.0.1` | `Benchmarks` | Benchmark competitor baseline |
-| `Mapster` | `10.0.11` | `Benchmarks`, `Mapster`, `Mapster.Tests` | Adapter bridge target & competitor baseline |
+| `Microsoft.CodeAnalysis.CSharp` | `5.9.0` | `Generator`, `Analyzers` | Roslyn compiler syntax and semantic model APIs |
+| `Microsoft.CodeAnalysis.CSharp.Workspaces` | `5.9.0` | `Analyzers` | Roslyn workspace and CodeFixProvider APIs |
+| `Microsoft.CodeAnalysis.Analyzers` | `5.9.0` | Build tooling | Roslyn diagnostic analyzer best practices |
+| `Microsoft.CodeAnalysis.PublicApiAnalyzers` | `5.6.0` | `Abstractions` | Enforces `PublicAPI.Shipped.txt` public surface invariant |
+| `Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit` | `1.1.2-beta1.22271.1` | `Analyzers.Tests` | Roslyn analyzer unit test verification harness |
+| `Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.XUnit` | `1.1.2-beta1.22271.1` | `Analyzers.Tests` | Roslyn code fix unit test verification harness |
+| `Microsoft.Extensions.DependencyInjection` | `10.0.11` | `Samples` | ASP.NET Core DI container abstractions |
+| `Microsoft.SourceLink.GitHub` | `10.0.400` | All `src/` projects | SourceLink deterministic debugging metadata |
+| `Microsoft.NET.Test.Sdk` | `18.9.0` | Test projects | MSBuild test execution target harness |
+| `xunit` | `2.9.3` | Test projects | Primary testing framework (v2) |
+| `xunit.v3` | `4.0.0` | Test projects | Next-generation xUnit v3 runner components |
+| `xunit.runner.visualstudio` | `4.0.0` | Test projects | Visual Studio / VSTest test runner adapter |
+| `coverlet.MTP` | `10.0.1` | Test projects | Multi-target coverage instrumentation |
+| `coverlet.collector` | `10.0.1` | Test projects | Cross-platform XPlat code coverage data collector |
+| `coverlet.msbuild` | `10.0.1` | Test projects | MSBuild coverage integration |
+| `AwesomeAssertions` | `9.6.0` | Test projects | Fluent assertion library |
+| `NSubstitute` | `6.2.0` | `Tests` | Dynamic mocking framework for unit testing |
+| `AutoFixture` | `4.18.1` | `Tests` | Automated anonymous test fixture generation |
+| `AutoFixture.Xunit2` | `4.18.1` | `Tests` | xUnit 2 data theory attribute integration |
+| `FsCheck.Xunit` | `3.4.0` | `Tests` | Property-based testing support |
+| `Verify.SourceGenerators` | `2.5.0` | `Generator.Tests` | Roslyn source generator snapshot verification |
+| `Verify.Xunit` | `31.12.5` | `Generator.Tests` | Snapshot assertion engine for xUnit |
+| `Basic.Reference.Assemblies.Net80` | `1.8.11` | `Generator.Tests` | In-memory reference metadata for Roslyn compilation tests |
+| `BenchmarkDotNet` | `0.15.8` | `Benchmarks` | Benchmarking framework |
+| `AutoMapper` | `16.2.0` | `Benchmarks` | Benchmark competitor baseline |
+| `Mapster` | `10.0.12` | `Benchmarks`, `Mapster`, `Mapster.Tests` | Adapter bridge target & competitor baseline |
 | `Riok.Mapperly` | `4.3.1` | `Benchmarks` | Source generator competitor baseline |
-| `EricksonLopez.DomainPrimitives.Abstractions` | `1.0.0` | `DomainPrimitives` | Target abstractions for domain primitive mapping |
-| `EricksonLopez.Result` | `1.0.0` | `Result`, `Result.Tests` | Target monad for functional railway mapping |
+| `EricksonLopez.DomainPrimitives.Abstractions` | `2.0.0` | `DomainPrimitives` | Target abstractions for domain primitive mapping |
+| `EricksonLopez.Result` | `2.0.0` | `Result`, `Result.Tests` | Target monad for functional railway mapping |
 
 ---
 
@@ -120,7 +127,7 @@ All 17 projects in the repository are fully mapped in `EricksonLopez.Mapper.slnx
 | `src/EricksonLopez.Mapper.Mapster/EricksonLopez.Mapper.Mapster.csproj` | ✅ Yes | `/src/` | Extension Package |
 | `src/EricksonLopez.Mapper.Result/EricksonLopez.Mapper.Result.csproj` | ✅ Yes | `/src/` | Extension Package |
 | `src/EricksonLopez.Mapper/EricksonLopez.Mapper.csproj` | ✅ Yes | `/src/` | Umbrella Package |
-| `sample/EricksonLopez.Mapper.Sample/EricksonLopez.Mapper.Sample.csproj` | ✅ Yes | `/samples/` | Showcase Application |
+| `samples/EricksonLopez.Mapper.Samples/EricksonLopez.Mapper.Samples.csproj` | ✅ Yes | `/samples/` | Showcase Application |
 | `tests/EricksonLopez.Mapper.Analyzers.Tests/EricksonLopez.Mapper.Analyzers.Tests.csproj` | ✅ Yes | `/tests/` | Analyzer Tests |
 | `tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotSmokeTest.csproj` | ✅ Yes | `/tests/` | NativeAOT Smoke Test |
 | `tests/EricksonLopez.Mapper.DomainPrimitives.Tests/EricksonLopez.Mapper.DomainPrimitives.Tests.csproj` | ✅ Yes | `/tests/` | Extension Unit Tests |

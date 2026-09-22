@@ -30,6 +30,7 @@ namespace EricksonLopez.Mapper
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level3_RealWorld.EventMapper>();
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level3_RealWorld.ConfigurationMapper>();
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level3_RealWorld.CollectionTypesMapper>();
+            services.AddSingleton<EricksonLopez.Mapper.Sample.Level3_RealWorld.HierarchyFlatteningMapper>();
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level3_RealWorld.OrderMapper>();
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level4_Advanced.ProductMapper>();
             services.AddSingleton<EricksonLopez.Mapper.Sample.Level4_Advanced.PaymentMapper>();

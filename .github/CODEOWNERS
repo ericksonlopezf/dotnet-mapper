@@ -21,7 +21,7 @@
 # Build infrastructure — version, signing, and package metadata
 /Directory.Build.props                      @ericksonlopezf
 /Directory.Packages.props                   @ericksonlopezf
-/dotnet-tools.json                          @ericksonlopezf
+/.config/dotnet-tools.json                  @ericksonlopezf
 /.codecov.yml                               @ericksonlopezf
 
 # Governance and community documents

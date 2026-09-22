@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 High-performance DDD enterprise applications frequently use `ImmutableArray<T>`, `ImmutableList<T>`, and .NET 8+ `FrozenSet<T>` and `FrozenDictionary<TKey, TValue>` for immutable value objects and aggregate read models.
 

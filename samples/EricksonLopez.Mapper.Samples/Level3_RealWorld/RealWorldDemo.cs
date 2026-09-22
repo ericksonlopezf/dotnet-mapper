@@ -55,14 +55,14 @@ public partial class OrderMapper
     /// <summary>Maps an <see cref="Order"/> to an <see cref="OrderDto"/>, including its nested address and items.</summary>
     /// <param name="source">The order to map from.</param>
     /// <returns>A new <see cref="OrderDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial OrderDto MapOrder(Order source);
 
     // A source generator requires that nested complex type mappings be declared as separate partial methods.
     /// <summary>Maps an <see cref="Address"/> to an <see cref="AddressDto"/>.</summary>
     /// <param name="source">The address to map from.</param>
     /// <returns>A new <see cref="AddressDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial AddressDto MapAddress(Address source);
 }
 

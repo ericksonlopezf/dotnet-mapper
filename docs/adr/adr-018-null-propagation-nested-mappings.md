@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 When mapping optional nested domain objects or DTOs (e.g., `source.Address?` to `target.Address?`), an unconditional call to a child mapping method `MapAddress(source.Address)` throws a runtime `ArgumentNullException` if the nested source is null, or produces unexpected empty target instances if not properly guarded.
 

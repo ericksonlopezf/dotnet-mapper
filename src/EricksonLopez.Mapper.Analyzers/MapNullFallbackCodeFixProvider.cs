@@ -36,7 +36,7 @@ public class MapNullFallbackCodeFixProvider : CodeFixProvider
         var declaration = token.Parent!.AncestorsAndSelf().OfType<MethodDeclarationSyntax>().FirstOrDefault();
         if (declaration == null) return;
 
-        var message = diagnostic.GetMessage();
+        var message = diagnostic.GetMessage(System.Globalization.CultureInfo.InvariantCulture);
         var startIndex = message.IndexOf('\'');
         var endIndex = message.IndexOf('\'', startIndex + 1);
         if (startIndex == -1 || endIndex == -1) return;

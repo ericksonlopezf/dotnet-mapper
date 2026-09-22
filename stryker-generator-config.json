@@ -22,7 +22,7 @@
       "break": 95
     },
     "coverage-analysis": "off",
-    "concurrency": 4,
+    "concurrency": 2,
     "reporters": [
       "html",
       "json",

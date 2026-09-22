@@ -22,7 +22,7 @@ The Showcase is organized into 11 progressive levels. Each level covers a specif
 | **0** | `Level0_Conceptual/` | What is the library? Why use it? | Architectural overview, AOT rationale |
 | **1** | `Level1_QuickStart/` | Installation, minimal setup, first mapping | `[Mapper]` (convention-based) |
 | **2** | `Level2_Configuration/` | All configuration attributes | `[MapProperty]`, `[MapIgnore]`, `[MapIgnoreSource]`, `[MapperIgnore]`, `[MapNullFallback]`, `[ValueObject]`, `[MapValue]`, `[EnumMappingStrategy]` (ByName+IgnoreCase **and** ByValue), `[MapEnumValue]`, `[assembly: MapperDefaults]`, `static partial class` mapper |
-| **3** | `Level3_RealWorld/` | Real-world scenarios | Nested mapping, collections, built-in type conversions (`enum↔string`, `Guid↔string`, `DateTime→DateOnly/Offset`, widening), all collection targets (`T[]`, `ImmutableArray<T>`, `HashSet<T>`, `Dictionary<K,V>`) |
+| **3** | `Level3_RealWorld/` | Real-world scenarios | Nested mapping, collections, built-in type conversions (`enum↔string`, `Guid↔string`, `DateTime→DateOnly/Offset`, widening), all collection targets (`T[]`, `ImmutableArray<T>`, `HashSet<T>`, `Dictionary<K,V>`), hierarchy flattening via deep dot-path `[MapProperty("A.B.C", "Dest")]` |
 | **4** | `Level4_Advanced/` | Advanced integration patterns | Records with primary constructors, `[MapFactory]`, `[MapDerivedType]` |
 | **5** | `Level5_Processing/` | Parallel & batch processing | Thread-safety, statelessness, PLINQ concurrent mapping |
 | **6** | `Level6_ErrorHandling/` | Runtime error boundaries | `IConverter<T,T>` exception handling, retry/dead-letter boundary |
@@ -56,6 +56,7 @@ The Showcase is organized into 11 progressive levels. Each level covers a specif
 - [`CollectionsDemo.cs`](Level3_RealWorld/CollectionsDemo.cs) — `Dictionary<K,V>` mapping with type conversion.
 - [`BuiltinConversionsDemo.cs`](Level3_RealWorld/BuiltinConversionsDemo.cs) — `enum↔string`, `Guid↔string`, `DateTime→DateOnly/Offset`, numeric widening.
 - [`CollectionTypesDemo.cs`](Level3_RealWorld/CollectionTypesDemo.cs) — `T[]`, `ImmutableArray<T>`, `HashSet<T>`, `IReadOnlyList<T>`, `IEnumerable<T>`.
+- [`HierarchyFlatteningDemo.cs`](Level3_RealWorld/HierarchyFlatteningDemo.cs) — `[MapProperty("A.B.C", "Dest")]` deep dot-path for hierarchy flattening (3 levels).
 
 ### Level 4 — Advanced Integration
 - [`AdvancedDemo.cs`](Level4_Advanced/AdvancedDemo.cs) — C# Records with parameterized constructors.
@@ -85,14 +86,14 @@ The Showcase is organized into 11 progressive levels. Each level covers a specif
 - [`ArchitectureDemo.cs`](Level10_Architecture/ArchitectureDemo.cs) — Clean Architecture layer separation and `[MapIgnoreSource]`.
 
 ### Cookbook
-- [`Cookbook/README.md`](Cookbook/README.md) — 27 targeted recipes for common and advanced mapping scenarios.
+- [`Cookbook/README.md`](Cookbook/README.md) — 28 targeted recipes for common and advanced mapping scenarios.
 
 ---
 
 ## Running the Showcase
 
 ```bash
-dotnet run --project sample/EricksonLopez.Mapper.Sample/EricksonLopez.Mapper.Sample.csproj
+dotnet run --project samples/EricksonLopez.Mapper.Samples/EricksonLopez.Mapper.Samples.csproj
 ```
 
 All demos run sequentially and print their structured output to the console.
@@ -107,7 +108,8 @@ Every element of the public API surface is demonstrated in this Showcase. The ta
 |---|---|---|---|
 | `[Mapper]` | Abstractions | 1 | `QuickStartDemo.cs` |
 | `[Mapper(StrictMapping = false)]` | Abstractions | 2 | `ConfigurationDemo.cs` |
-| `[MapProperty]` | Abstractions | 2 | `ConfigurationDemo.cs`, `BuiltinConversionsDemo.cs` |
+| `[MapProperty]` (simple rename) | Abstractions | 2 | `ConfigurationDemo.cs`, `BuiltinConversionsDemo.cs` |
+| `[MapProperty("A.B.C", "Dest")]` (dot-path flatten) | Abstractions | 3 | `HierarchyFlatteningDemo.cs` |
 | `[MapIgnore]` | Abstractions | 2 | `ConfigurationDemo.cs` |
 | `[MapIgnoreSource]` | Abstractions | 2,10 | `ConfigurationDemo.cs`, `ArchitectureDemo.cs` |
 | `[MapperIgnore]` | Abstractions | 2 | `ConfigurationDemo.cs` |

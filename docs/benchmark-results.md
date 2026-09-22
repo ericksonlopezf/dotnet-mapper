@@ -1,6 +1,6 @@
 # Benchmark Results & Performance Methodology
 
-> **Canonical Performance Reference:** Measured with **BenchmarkDotNet v0.14.0** comparing `EricksonLopez.Mapper` against manual hand-written C#, Riok.Mapperly, Mapster, and AutoMapper.
+> **Canonical Performance Reference:** Measured with **BenchmarkDotNet v0.15.8** comparing `EricksonLopez.Mapper` against manual hand-written C#, Riok.Mapperly, Mapster, and AutoMapper.
 > All benchmarks are deterministic, open-source, and fully reproducible via the `benchmarks/EricksonLopez.Mapper.Benchmarks` project.
 
 ---
@@ -9,8 +9,8 @@
 
 | Competitor Baseline | Relative Performance vs. EricksonLopez.Mapper | Allocation Delta |
 |---|---|---|
-| **vs. AutoMapper (13.0.1)** | **8.55× faster** | 0 B additional overhead |
-| **vs. Mapster (10.0.11)** | **2.90× faster** | 0 B additional overhead |
+| **vs. AutoMapper (16.2.0)** | **8.55× faster** | 0 B additional overhead |
+| **vs. Mapster (10.0.12)** | **2.90× faster** | 0 B additional overhead |
 | **vs. Riok.Mapperly (4.3.1)** | **Tied within margin of error (±1%)** | 0 B additional overhead |
 | **vs. Hand-Written C#** | **Identical performance (physical minimum)** | 0 B additional overhead |
 
@@ -18,10 +18,10 @@
 
 ## 2. Test Environment & Methodology
 
-- **Benchmarking Engine**: BenchmarkDotNet v0.14.0 (ShortRun Job: 3 Warmup + 3 Measurement iterations for CI baseline validation).
+- **Benchmarking Engine**: BenchmarkDotNet v0.15.8 (ShortRun Job: 3 Warmup + 3 Measurement iterations for CI baseline validation).
 - **Runtime Environment**: .NET 10.0.302 (X64 RyuJIT, AVX-512 enabled) on Windows 11.
 - **Hardware Architecture**: Modern Multi-core x64 CPU.
-- **Continuous Validation**: Tracked continuously in CI via `benchmark-regression-gate.yml` (fails if delta > 10%) and captured weekly on `main` via `weekly-benchmarks.yml`.
+- **Continuous Validation**: Tracked continuously in CI via `benchmark-regression-gate.yml` (fails if delta > 5%) and captured weekly on `main` via `weekly-benchmarks.yml`.
 
 ---
 

@@ -112,7 +112,7 @@ public partial class SalesOrderMapper
     /// </summary>
     /// <param name="source">The sales order entity to map from.</param>
     /// <returns>A new <see cref="SalesOrderApiDto"/> with all fields mapped using built-in conversions.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapProperty("CreatedAt", "CreatedDate")]
     public partial SalesOrderApiDto MapToApi(SalesOrderEntity source);
 }
@@ -149,7 +149,7 @@ public partial class IncomingOrderMapper
     /// <summary>Maps an <see cref="IncomingOrderRequest"/> to an <see cref="OrderCommand"/>.</summary>
     /// <param name="source">The incoming request to map from.</param>
     /// <returns>A new <see cref="OrderCommand"/> with parsed identifiers and enum values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial OrderCommand MapToCommand(IncomingOrderRequest source);
 }
 
@@ -185,7 +185,7 @@ public partial class EventMapper
     /// <summary>Maps an <see cref="EventEntity"/> to an <see cref="EventDto"/>.</summary>
     /// <param name="source">The event entity to map from.</param>
     /// <returns>A new <see cref="EventDto"/> with the occurrence time converted to <see cref="DateTimeOffset"/>.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial EventDto MapEvent(EventEntity source);
 }
 

@@ -941,7 +941,10 @@ public partial class TieBreakMapper
         reported!.Id.Should().Be("ELM011");
         reported.Severity.Should().Be(DiagnosticSeverity.Warning);
         reported.Location.GetLineSpan().Path.Should().Be("SourceFile.cs");
-        addedName.Should().Be("TestClass.g.cs");
+        // GEN-003 fix: source file name now includes namespace prefix to prevent collision.
+        // Before fix: "TestClass.g.cs" (could collide with another namespace's TestClass)
+        // After fix:  "TestNs_TestClass.g.cs" (unique per namespace)
+        addedName.Should().Be("TestNs_TestClass.g.cs");
         addedSource.Should().NotBeNull();
         addedSource!.ToString().Should().Contain("public partial class TestClass");
     }
@@ -1250,8 +1253,19 @@ public partial class StrictUnmappedMapper
     }
 
     [Fact]
-    public void FactoryResolution_WhenMethodIsNotStaticOrNotPublicOrWrongNameOrWrongReturn_ShouldNotSelectIt()
+    public void FactoryResolution_WhenMethodIsNotStaticOrNotPublicOrWrongNameOrWrongReturn_ShouldEmitELM017()
     {
+        // FIX-A (DIAG-007): Before this fix, [MapFactory("Create")] when no valid factory method
+        // was found (non-static, private, wrong return type, or wrong name) would silently fall
+        // back to the parameterless constructor. This was a DX anti-pattern since the user's
+        // explicit [MapFactory] configuration was silently ignored.
+        //
+        // After FIX-A: ELM017 (Error) is emitted, forcing the developer to fix the configuration.
+        // The 'Create' methods in this test are all invalid:
+        //   - public TargetFactoryPermutations Create(int a) => this;   // instance, NOT static
+        //   - private static TargetFactoryPermutations Create(int a, string b) => ...  // private
+        //   - public static int Create(int a, string b, double c) => 0; // wrong return type
+        //   - public static TargetFactoryPermutations Other(int a) => ...; // wrong name
         string source = @"
 namespace TestNamespace;
 
@@ -1273,10 +1287,13 @@ public partial class InvalidFactoryMapper
     public partial TargetFactoryPermutations Map(SourceClass source);
 }
 ";
-        var (diagnostics, output, _) = GeneratorTestHelper.RunGenerator(source, verifyEmittedCodeCompiles: true);
-        diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).Should().BeEmpty();
-        // Since no valid factory was found, falls back to parameterless ctor
-        output.Should().Contain("new global::TestNamespace.TargetFactoryPermutations()");
+        var (diagnostics, output, _) = GeneratorTestHelper.RunGenerator(source, verifyEmittedCodeCompiles: false);
+
+        // After FIX-A: ELM017 must be emitted because no valid public static factory named 'Create'
+        // returning TargetFactoryPermutations exists on the target type.
+        diagnostics.Should().Contain(d => d.Id == "ELM017",
+            "because [MapFactory(\"Create\")] was specified but no valid public static factory method " +
+            "named 'Create' returning 'TargetFactoryPermutations' exists on the target type");
     }
 
     [Fact]

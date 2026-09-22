@@ -36,7 +36,7 @@ public partial class SimpleUserMapper
     /// <summary>Maps a <see cref="SimpleUser"/> to a <see cref="SimpleUserDto"/>.</summary>
     /// <param name="source">The source user entity to map from.</param>
     /// <returns>A new <see cref="SimpleUserDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial SimpleUserDto Map(SimpleUser source);
 }
 

@@ -1,5 +1,11 @@
 # ADR-D05: Existing Instance Mapping Rejected
 
+## Status
+Rejected
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13
 

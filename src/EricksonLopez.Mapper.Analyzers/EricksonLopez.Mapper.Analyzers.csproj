@@ -6,7 +6,7 @@
     <NoWarn>$(NoWarn);RS2008;RS1038</NoWarn>
     <IsAotCompatible>false</IsAotCompatible>
     <IsTrimmable>false</IsTrimmable>
-    <PackageTags>$(CommonPackageTags);roslyn;analyzer;analyzers;code-fix;diagnostics;static-analysis;linting</PackageTags>
+    <PackageTags>$(CommonPackageTags);mapper;mapping;roslyn;analyzers;code-fix;diagnostics;static-analysis;linting</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,6 +3,9 @@
 ## Status
 Accepted (Updated: 2026-08-19)
 
+## Date
+2026-08-19
+
 ## Context
 In domain-driven and distributed .NET applications, enumerations frequently need to be translated across boundaries:
 1. Between domain Enums and DTO Enums where member names match.

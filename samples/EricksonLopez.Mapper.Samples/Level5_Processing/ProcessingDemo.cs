@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using EricksonLopez.Mapper;
+
 
 namespace EricksonLopez.Mapper.Sample.Level5_Processing;
 
@@ -38,7 +38,7 @@ public partial class BatchMapper
     /// <summary>Maps a <see cref="DataRecord"/> to a <see cref="DataRecordDto"/>.</summary>
     /// <param name="source">The data record to map from.</param>
     /// <returns>A new <see cref="DataRecordDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial DataRecordDto Map(DataRecord source);
 }
 

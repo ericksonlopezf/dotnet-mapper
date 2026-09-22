@@ -1,4 +1,12 @@
 #nullable enable
+EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategy.ByName = 0 -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategy.ByValue = 1 -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.EnumMappingStrategyAttribute
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.EnumMappingStrategyAttribute(EricksonLopez.Mapper.EnumMappingStrategy strategy) -> void
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.IgnoreCase.get -> bool
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.IgnoreCase.set -> void
+EricksonLopez.Mapper.EnumMappingStrategyAttribute.Strategy.get -> EricksonLopez.Mapper.EnumMappingStrategy
 EricksonLopez.Mapper.GenerateMapperRegistrationAttribute
 EricksonLopez.Mapper.GenerateMapperRegistrationAttribute.GenerateMapperRegistrationAttribute() -> void
 EricksonLopez.Mapper.IConverter<TSource, TDestination>
@@ -7,30 +15,49 @@ EricksonLopez.Mapper.MapDerivedTypeAttribute
 EricksonLopez.Mapper.MapDerivedTypeAttribute.MapDerivedTypeAttribute(System.Type! sourceType, System.Type! targetType) -> void
 EricksonLopez.Mapper.MapDerivedTypeAttribute.SourceType.get -> System.Type!
 EricksonLopez.Mapper.MapDerivedTypeAttribute.TargetType.get -> System.Type!
+EricksonLopez.Mapper.MapEnumValueAttribute
+EricksonLopez.Mapper.MapEnumValueAttribute.MapEnumValueAttribute(object! source, object! target) -> void
+EricksonLopez.Mapper.MapEnumValueAttribute.Source.get -> object!
+EricksonLopez.Mapper.MapEnumValueAttribute.Target.get -> object!
 EricksonLopez.Mapper.MapFactoryAttribute
 EricksonLopez.Mapper.MapFactoryAttribute.MapFactoryAttribute(string! methodName) -> void
 EricksonLopez.Mapper.MapFactoryAttribute.MethodName.get -> string!
 EricksonLopez.Mapper.MapIgnoreAttribute
 EricksonLopez.Mapper.MapIgnoreAttribute.DestinationName.get -> string!
 EricksonLopez.Mapper.MapIgnoreAttribute.MapIgnoreAttribute(string! destinationName) -> void
+EricksonLopez.Mapper.MapIgnoreSourceAttribute
+EricksonLopez.Mapper.MapIgnoreSourceAttribute.MapIgnoreSourceAttribute(string! sourceName) -> void
+EricksonLopez.Mapper.MapIgnoreSourceAttribute.SourceName.get -> string!
 EricksonLopez.Mapper.MapNullFallbackAttribute
 EricksonLopez.Mapper.MapNullFallbackAttribute.DestinationName.get -> string!
 EricksonLopez.Mapper.MapNullFallbackAttribute.FallbackExpression.get -> string!
 EricksonLopez.Mapper.MapNullFallbackAttribute.MapNullFallbackAttribute(string! destinationName, string! fallbackExpression) -> void
-EricksonLopez.Mapper.MapperAttribute
-EricksonLopez.Mapper.MapperAttribute.MapperAttribute() -> void
-EricksonLopez.Mapper.MapperAttribute.StrictMapping.get -> bool
-EricksonLopez.Mapper.MapperAttribute.StrictMapping.set -> void
 EricksonLopez.Mapper.MapPropertyAttribute
 EricksonLopez.Mapper.MapPropertyAttribute.DestinationName.get -> string!
 EricksonLopez.Mapper.MapPropertyAttribute.MapPropertyAttribute(string! sourceName, string! destinationName) -> void
 EricksonLopez.Mapper.MapPropertyAttribute.SourceName.get -> string!
+EricksonLopez.Mapper.MapValueAttribute
+EricksonLopez.Mapper.MapValueAttribute.DestinationName.get -> string!
+EricksonLopez.Mapper.MapValueAttribute.MapValueAttribute(string! destinationName, string! valueExpression) -> void
+EricksonLopez.Mapper.MapValueAttribute.ValueExpression.get -> string!
+EricksonLopez.Mapper.MapperAttribute
+EricksonLopez.Mapper.MapperAttribute.MapperAttribute() -> void
+EricksonLopez.Mapper.MapperAttribute.StrictMapping.get -> bool
+EricksonLopez.Mapper.MapperAttribute.StrictMapping.set -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumIgnoreCase.get -> bool
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumIgnoreCase.set -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumMappingStrategy.get -> EricksonLopez.Mapper.EnumMappingStrategy
+EricksonLopez.Mapper.MapperDefaultsAttribute.EnumMappingStrategy.set -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.MapperDefaultsAttribute() -> void
+EricksonLopez.Mapper.MapperDefaultsAttribute.StrictMapping.get -> bool
+EricksonLopez.Mapper.MapperDefaultsAttribute.StrictMapping.set -> void
+EricksonLopez.Mapper.MapperIgnoreAttribute
+EricksonLopez.Mapper.MapperIgnoreAttribute.MapperIgnoreAttribute() -> void
 EricksonLopez.Mapper.UseConverterAttribute
+EricksonLopez.Mapper.UseConverterAttribute.ConverterFieldName.get -> string?
 EricksonLopez.Mapper.UseConverterAttribute.ConverterType.get -> System.Type!
 EricksonLopez.Mapper.UseConverterAttribute.UseConverterAttribute(System.Type! converterType) -> void
-EricksonLopez.Mapper.MapIgnoreSourceAttribute
-EricksonLopez.Mapper.MapIgnoreSourceAttribute.MapIgnoreSourceAttribute(string! sourceName) -> void
-EricksonLopez.Mapper.MapIgnoreSourceAttribute.SourceName.get -> string!
+EricksonLopez.Mapper.UseConverterAttribute.UseConverterAttribute(string! converterFieldName) -> void
 EricksonLopez.Mapper.ValueObjectAttribute
 EricksonLopez.Mapper.ValueObjectAttribute.ValueObjectAttribute() -> void
-

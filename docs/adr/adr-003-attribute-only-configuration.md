@@ -1,5 +1,11 @@
 # ADR-003: Attribute-Only Configuration (No Fluent API)
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13
 

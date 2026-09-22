@@ -52,7 +52,7 @@ public partial class CustomizationMapper
     /// <summary>Converts a <see cref="LegacyUser"/> to a <see cref="ModernUser"/> by splitting the full name.</summary>
     /// <param name="source">The legacy user to convert.</param>
     /// <returns>A new <see cref="ModernUser"/> with the first and last names separated.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [UseConverter(typeof(LegacyToModernUserConverter))]
     public partial ModernUser Map(LegacyUser source);
 }
