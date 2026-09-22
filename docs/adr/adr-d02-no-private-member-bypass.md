@@ -1,5 +1,11 @@
 # ADR-D02: Private Member Bypass Rejected
 
+## Status
+Rejected
+
+## Date
+2026-08-13
+
 **Status**: Accepted  
 **Date**: 2026-08-13
 

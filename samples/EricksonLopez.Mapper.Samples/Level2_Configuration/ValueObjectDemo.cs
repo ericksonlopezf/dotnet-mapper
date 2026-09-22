@@ -116,7 +116,7 @@ public partial class ValueObjectMapper
     /// </summary>
     /// <param name="source">The domain entity to map from.</param>
     /// <returns>A new <see cref="CustomerOrderDto"/> with all identifiers and amounts as primitives.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial CustomerOrderDto MapToDto(CustomerOrderEntity source);
 
     /// <summary>
@@ -125,7 +125,7 @@ public partial class ValueObjectMapper
     /// </summary>
     /// <param name="source">The command to map from.</param>
     /// <returns>A new <see cref="CustomerOrderEntity"/> with all identifiers and amounts as Value Objects.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial CustomerOrderEntity MapToEntity(CustomerOrderCommand source);
 }
 

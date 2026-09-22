@@ -116,7 +116,7 @@ public partial class VehicleMapper
     /// A <see cref="CarDto"/> when <paramref name="source"/> is a <see cref="CarEntity"/>,
     /// or a <see cref="TruckDto"/> when it is a <see cref="TruckEntity"/>.
     /// </returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapDerivedType(typeof(CarEntity), typeof(CarDto))]
     [MapDerivedType(typeof(TruckEntity), typeof(TruckDto))]
     public partial VehicleDto Map(VehicleEntity source);
@@ -124,13 +124,13 @@ public partial class VehicleMapper
     /// <summary>Maps a <see cref="CarEntity"/> to a <see cref="CarDto"/>.</summary>
     /// <param name="source">The car entity to map from.</param>
     /// <returns>A new <see cref="CarDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial CarDto MapCar(CarEntity source);
 
     /// <summary>Maps a <see cref="TruckEntity"/> to a <see cref="TruckDto"/>.</summary>
     /// <param name="source">The truck entity to map from.</param>
     /// <returns>A new <see cref="TruckDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial TruckDto MapTruck(TruckEntity source);
 }
 

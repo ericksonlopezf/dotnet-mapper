@@ -43,7 +43,7 @@ public class AddPartialMappingMethodCodeFixProvider : CodeFixProvider
 
         // Extract source and destination type names from the diagnostic message
         // Format: "Cannot convert from '{0}' to '{1}' for member '{2}'"
-        var message = diagnostic.GetMessage();
+        var message = diagnostic.GetMessage(System.Globalization.CultureInfo.InvariantCulture);
         var parts = ExtractTypes(message);
         if (parts == null) return;
 

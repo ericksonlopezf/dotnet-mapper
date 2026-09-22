@@ -9,9 +9,10 @@
       "*ConfigureAwait*"
     ],
     "thresholds": {
-      "high": 90,
-      "low": 80,
-      "break": 75
-    }
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "concurrency": 2
   }
 }

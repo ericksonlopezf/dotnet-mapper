@@ -162,6 +162,91 @@ namespace TestNamespace
         }
 
         [Fact]
+        public async Task Analyze_WhenInterfaceIsNotPartial_ShouldEmitELM012()
+        {
+            var testCode = @"
+namespace TestNamespace
+{
+    using EricksonLopez.Mapper;
+
+    [Mapper]
+    public interface IMyMapper
+    {
+    }
+}";
+
+            var expected = VerifyCS.Diagnostic("ELM012").WithLocation(7, 22).WithMessage("Mapper class 'IMyMapper' must be declared as partial");
+            await VerifyMapperAnalyzerAsync(testCode, expected);
+        }
+
+        [Fact]
+        public async Task Analyze_WhenInterfaceIsPartial_ShouldNotEmitDiagnostics()
+        {
+            var testCode = @"
+namespace TestNamespace
+{
+    using EricksonLopez.Mapper;
+
+    [Mapper]
+    public partial interface IMyMapper
+    {
+    }
+}";
+
+            await VerifyMapperAnalyzerAsync(testCode);
+        }
+
+        [Fact]
+        public async Task Analyze_WhenInterfaceIsNotMapper_ShouldNotEmitDiagnostics()
+        {
+            var testCode = @"
+namespace TestNamespace
+{
+    public interface INormalInterface
+    {
+    }
+}";
+
+            await VerifyCS.VerifyAnalyzerAsync(testCode);
+        }
+
+        [Fact]
+        public async Task Analyze_WhenInterfaceHasMultipleAttributesIncludingMapper_ShouldEmitELM012()
+        {
+            var testCode = @"
+namespace TestNamespace
+{
+    using System;
+    using EricksonLopez.Mapper;
+
+    [Obsolete, Mapper]
+    public interface IMyMapper
+    {
+    }
+}";
+
+            var expected = VerifyCS.Diagnostic("ELM012").WithLocation(8, 22).WithMessage("Mapper class 'IMyMapper' must be declared as partial");
+            await VerifyMapperAnalyzerAsync(testCode, expected);
+        }
+
+        [Fact]
+        public async Task Analyze_WhenInterfaceHasDifferentAttribute_ShouldNotEmitDiagnostics()
+        {
+            var testCode = @"
+namespace TestNamespace
+{
+    using System;
+
+    [Obsolete]
+    public interface INonMapper
+    {
+    }
+}";
+
+            await VerifyCS.VerifyAnalyzerAsync(testCode);
+        }
+
+        [Fact]
         public async Task Analyze_WhenTopLevelStatement_ShouldIgnore()
         {
             var testCode = @"

@@ -29,7 +29,7 @@ public partial class ConfigurationMapper
     /// <summary>Maps a <see cref="ConfigurationEntity"/> to a <see cref="ConfigurationDto"/>.</summary>
     /// <param name="source">The configuration entity to map from.</param>
     /// <returns>A new <see cref="ConfigurationDto"/> with all integer values converted to strings.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial ConfigurationDto Map(ConfigurationEntity source);
 
     /// <summary>Converts an integer configuration value to its string representation.</summary>

@@ -61,6 +61,8 @@ Emitted during compilation by `EricksonLopez.Mapper.Generator`:
 | **`ELM014`** | Error / Warn | Enum Completeness: Unmapped enum member in strict mode |
 | **`ELM015`** | Warning | Precision Safety: Narrowing numeric conversion potential data loss |
 | **`ELM016`** | Warning | Runtime Parse Safety: String to enum mapping parsing risk |
+| **`ELM017`** | Error | Factory Safety: Factory method specified in `[MapFactory]` was not found on destination type |
+| **`ELM018`** | Warning | Mapping Clarity: Duplicate `[MapProperty]` declarations targeting the same destination member |
 
 ### Layer 2: Roslyn Analyzer Rules (IDE & Build Invariants)
 
@@ -108,4 +110,4 @@ dotnet publish tests/EricksonLopez.Mapper.AotSmokeTest/EricksonLopez.Mapper.AotS
 
 Enforced by `benchmark-regression-gate.yml`:
 - Compares PR BenchmarkDotNet results against baseline data in `benchmarks/results/`.
-- Fails CI if any benchmark regresses by more than **10%** in execution latency or memory allocations.
+- Fails CI if any benchmark regresses by more than **5%** in execution latency or memory allocations.

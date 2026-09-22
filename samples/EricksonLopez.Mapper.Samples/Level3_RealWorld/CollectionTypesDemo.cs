@@ -171,13 +171,13 @@ public partial class CollectionTypesMapper
     /// </summary>
     /// <param name="source">The article entity to map from.</param>
     /// <returns>A new <see cref="ArticleDto"/> with all collection properties mapped.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial ArticleDto MapArticle(ArticleEntity source);
 
     /// <summary>Maps a <see cref="TagEntity"/> to a <see cref="TagDto"/>.</summary>
     /// <param name="source">The tag entity to map from.</param>
     /// <returns>A new <see cref="TagDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial TagDto MapTag(TagEntity source);
 
     /// <summary>
@@ -186,13 +186,13 @@ public partial class CollectionTypesMapper
     /// </summary>
     /// <param name="source">The role entity to map from.</param>
     /// <returns>A new <see cref="RoleDto"/> with permissions stored in an immutable array.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial RoleDto MapRole(RoleEntity source);
 
     /// <summary>Maps a <see cref="PermissionEntity"/> to a <see cref="PermissionDto"/>.</summary>
     /// <param name="source">The permission entity to map from.</param>
     /// <returns>A new <see cref="PermissionDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial PermissionDto MapPermission(PermissionEntity source);
 
     /// <summary>
@@ -201,7 +201,7 @@ public partial class CollectionTypesMapper
     /// </summary>
     /// <param name="source">The user tags entity to map from.</param>
     /// <returns>A new <see cref="UserTagsDto"/> with a deduplicated tag set.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial UserTagsDto MapUserTags(UserTagsEntity source);
 
     /// <summary>
@@ -210,7 +210,7 @@ public partial class CollectionTypesMapper
     /// </summary>
     /// <param name="source">The report section entity to map from.</param>
     /// <returns>A new <see cref="ReportSectionDto"/> with a materialized list of lines.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public partial ReportSectionDto MapSection(ReportSectionEntity source);
 }
 

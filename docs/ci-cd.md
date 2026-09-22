@@ -1,6 +1,6 @@
-# CI/CD Pipeline
+# CI/CD Pipeline & Quality Automation Architecture
 
-The `EricksonLopez.Mapper` repository employs an automated GitHub Actions DevOps architecture composed of **9 specialized workflows**. Continuous integration, NativeAOT smoke testing, multi-project mutation analysis, benchmark regression gates, and release publishing operate independently with explicit triggers and secrets management.
+The `EricksonLopez.Mapper` repository employs an automated GitHub Actions DevOps architecture composed of **10 specialized workflows**. Continuous integration, NativeAOT smoke testing, multi-project mutation analysis, benchmark regression gates, compliance verification, and release publishing operate independently with explicit triggers and secrets management.
 
 ---
 
@@ -13,10 +13,11 @@ The `EricksonLopez.Mapper` repository employs an automated GitHub Actions DevOps
 | **NativeAOT Smoke Test** | `aot-smoke-test.yml` | `workflow_call`, `workflow_dispatch` | Compiles and executes `AotSmokeTest` under Linux using NativeAOT (`PublishAot=true`). |
 | **Publish NuGet** | `publish.yml` | `push v*.*.*` tag, `workflow_dispatch` | Builds, tests, packs 7 packages, attests Sigstore provenance, publishes to NuGet.org via OIDC, and creates GitHub Release. |
 | **Release Please** | `release-please.yml` | `push` → `main` | Parses Conventional Commits, creates release PRs, tags releases, and dispatches `publish.yml`. |
-| **Mutation Testing** | `mutation-testing.yml` | Schedule Mon 04:00 UTC, `workflow_dispatch` | Runs Stryker.NET in a parallel matrix across **7 packages**: Core, Abstractions, Analyzers, DomainPrimitives, Generator, Mapster, Result. |
-| **Benchmark Regression Gate** | `benchmark-regression-gate.yml` | PR → `main`, `develop` | Compares PR benchmark performance against baseline in `benchmarks/results/` (fails if delta > 10%). |
-| **Benchmarks Baseline** | `benchmarks.yml` | `push` → `main`, `workflow_dispatch` | Captures benchmark baseline on `main` and commits results back to the branch. |
-| **Weekly Deep Benchmarks** | `weekly-benchmarks.yml` | Schedule Sun 02:00 UTC, `workflow_dispatch` | Full non-abbreviated BenchmarkDotNet run across .NET 8, 9, and 10. |
+| **Mutation Testing** | `mutation-testing.yml` | Schedule (Mon 04:00 UTC), `workflow_dispatch` | Runs Stryker.NET in a parallel matrix across **7 packages**: Core, Abstractions, Analyzers, DomainPrimitives, Generator, Mapster, Result. |
+| **Benchmark Regression Gate** | `benchmark-regression-gate.yml` | `PR` → `main`, `develop` | Compares PR benchmark performance against baseline in `benchmarks/results/` (fails if delta > 5% via `verify-benchmark-gate.ps1`). |
+| **Benchmarks Baseline** | `benchmarks.yml` | `workflow_dispatch` | Captures benchmark baseline and commits results back to the branch. |
+| **Weekly Deep Benchmarks** | `weekly-benchmarks.yml` | Schedule (Sun 02:00 UTC), `workflow_dispatch` | Full non-abbreviated BenchmarkDotNet run across .NET 8, 9, and 10. |
+| **Repository Compliance Gate** | `repo-compliance.yml` | `push`/`PR` → `main`, `workflow_dispatch` | Executes `./scripts/verify-compliance.ps1` enforcing 8 zero-tolerance governance and architecture gates. |
 
 ---
 
@@ -111,7 +112,7 @@ This workflow validates that `IsAotCompatible=true` is physically enforced:
     -p:WarningLevel=5 \
     --output ./aot-output
   ```
-- **Hard Gate**: `DOTNET_EnableAotCompilationWarningsAsErrors=true` ensures any `IL2026` (RequiresUnreferencedCode) or `IL3050` (RequiresDynamicCode) trim warning fails the build.
+- **Hard Gate**: `DOTNET_EnableAotCompilationWarningsAsErrors=true` ensures any `IL2026` (`RequiresUnreferencedCode`) or `IL3050` (`RequiresDynamicCode`) trim warning fails the build.
 - **Execution**: The resulting native Linux ELF binary `./aot-output/EricksonLopez.Mapper.AotSmokeTest` is executed directly to verify zero runtime initialization faults.
 
 ---
@@ -132,7 +133,7 @@ Stryker.NET runs across **7 packages** in a parallel matrix:
 
 > **Note:** All Stryker configuration files are located at the **repository root**, not within individual `src/` project directories.
 
-- **Trigger**: Weekly schedule (Monday 04:00 UTC) and `workflow_dispatch` — does NOT run on pull requests.
+- **Trigger**: Weekly schedule (Monday 04:00 UTC) and `workflow_dispatch` — does NOT run on pull requests to avoid excessive CI duration.
 - **Mutation Level**: Configurable via `workflow_dispatch` input (`Basic` / `Standard` / `Advanced`). Default: `Standard`.
 - **Thresholds** (single source of truth in each `stryker-*.json`): High ≥100%, Low ≥98%, Break <95%.
 - **Result Aggregation**: A `mutation-gate-summary` job collects per-package JSON summaries, posts a consolidated markdown table to `GITHUB_STEP_SUMMARY`, and publishes a commit status (`mutation-testing/stryker`) used by the publish pipeline's `verify-mutation-gate.js` quality gate.
@@ -143,12 +144,29 @@ Stryker.NET runs across **7 packages** in a parallel matrix:
 
 - **Trigger**: Pull requests touching `src/**` or `benchmarks/**`.
 - **Execution**: Runs BenchmarkDotNet against PR head with `--job short`.
-- **Comparison Engine**: Python script parses JSON benchmark results against `benchmarks/results/` baseline on `main`.
-- **Gate Failure**: Any benchmark exceeding the 10% regression threshold (`REGRESSION_THRESHOLD`) fails the build with a summary table in `GITHUB_STEP_SUMMARY`.
+- **Comparison Engine**: PowerShell script `./scripts/verify-benchmark-gate.ps1` parses JSON benchmark outputs against `benchmarks/results/baseline.json`.
+- **Gate Failure**: Any benchmark exceeding the 5% regression threshold (`REGRESSION_THRESHOLD`) fails the build with a detailed diagnostic report in `GITHUB_STEP_SUMMARY`.
 
 ---
 
-## 8. Supply Chain Security Architecture
+## 8. Repository Compliance Gate: `repo-compliance.yml`
+
+- **Trigger**: Push and pull requests to `main`, and manual dispatch.
+- **Script**: `./scripts/verify-compliance.ps1`
+- **Gates Verified**:
+  1. Documentation naming in `docs/` (kebab-case).
+  2. Zero `[Obsolete]` API usages in `src/`.
+  3. Canonical MIT copyright headers in all production C# files.
+  4. Single top-level type per file invariant in `src/`.
+  5. Correct GitHub repository identity links (`ericksonlopezf/dotnet-mapper`).
+  6. Official contact email normalization (`ericksonlopezf@gmail.com`).
+  7. Zero illegal `NoWarn` suppressions for obsolete/security warnings.
+  8. Stryker configuration, concurrency (2), threshold (100/98/95), and package matrix synchronization.
+  9. NativeAOT project parity and test suite symmetry.
+
+---
+
+## 9. Supply Chain Security Architecture
 
 | Security Control | Implementation Mechanism |
 |---|---|

@@ -159,6 +159,20 @@ public class AttributesTests
         sut.ConverterFieldName.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData(typeof(string))]
+    [InlineData(typeof(int))]
+    [InlineData(typeof(IConverter<int, string>))]
+    public void UseConverterAttribute_WhenConstructedWithType_ShouldSetConverterType(Type converterType)
+    {
+        // Act
+        var sut = new UseConverterAttribute(converterType);
+
+        // Assert
+        sut.ConverterType.Should().Be(converterType);
+        sut.ConverterFieldName.Should().BeNull();
+    }
+
     [Fact]
     public void MapValueAttribute_WhenConstructorCalled_ShouldSetProperties()
     {

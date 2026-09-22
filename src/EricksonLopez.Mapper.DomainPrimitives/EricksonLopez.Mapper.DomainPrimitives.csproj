@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Description>DomainPrimitives integration for EricksonLopez.Mapper. Enables mapping strongly-typed IDs and value objects to and from primitive types.</Description>
-    <PackageTags>$(CommonPackageTags);domain-primitives;domain-driven-design;ddd;strongly-typed-id;value-objects;converter;native-aot</PackageTags>
+    <PackageTags>$(CommonPackageTags);mapper;mapping;domain-primitives;domain-driven-design;ddd;strongly-typed-id;value-object;converter;native-aot;aot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -48,7 +48,7 @@ public partial class ConfiguredUserMapper
     /// </summary>
     /// <param name="source">The user entity to map from.</param>
     /// <returns>A new <see cref="UserContract"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     [MapProperty("InternalKey", "ExternalId")]
     [MapIgnoreSource("PasswordHash")]
     [MapIgnore("UnmappedProperty")]

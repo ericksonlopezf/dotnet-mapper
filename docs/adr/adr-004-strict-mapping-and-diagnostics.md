@@ -1,5 +1,11 @@
 # ADR-004: Strict Mapping Engine and Compile-Time Diagnostics
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13
 **Deciders**: EricksonLopez.Mapper Architecture Team

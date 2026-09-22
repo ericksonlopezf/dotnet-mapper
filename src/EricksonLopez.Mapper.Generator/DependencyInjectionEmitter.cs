@@ -39,7 +39,10 @@ internal static class DependencyInjectionEmitter
         {
             if (!map.IsStatic)
             {
-                sb.AppendLine($"            services.AddSingleton<{map.Namespace}.{map.ClassName}>();");
+                string typeName = string.IsNullOrWhiteSpace(map.Namespace)
+                    ? CodeEmitter.EscapeIdentifier(map.ClassName)
+                    : $"{CodeEmitter.EscapeIdentifier(map.Namespace)}.{CodeEmitter.EscapeIdentifier(map.ClassName)}";
+                sb.AppendLine($"            services.AddSingleton<{typeName}>();");
             }
             foreach (var method in map.Methods)
             {

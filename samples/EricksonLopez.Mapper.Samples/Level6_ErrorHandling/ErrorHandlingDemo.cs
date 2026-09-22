@@ -25,7 +25,7 @@ public class ReliableDto
 public class UnreliableDataConverter : IConverter<UnreliableEntity, ReliableDto>
 {
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">The <see cref="UnreliableEntity.Data"/> value is <c>"Error"</c>.</exception>
+    /// <exception cref="InvalidOperationException">The <see cref="UnreliableEntity.Data"/> value is <c>"Error"</c></exception>
     public ReliableDto Convert(UnreliableEntity source)
     {
         if (source.Data == "Error")
@@ -46,8 +46,8 @@ public partial class ErrorHandlingMapper
     /// <summary>Converts an <see cref="UnreliableEntity"/> to a <see cref="ReliableDto"/> using the custom converter.</summary>
     /// <param name="source">The entity to convert.</param>
     /// <returns>A <see cref="ReliableDto"/> containing the converted data.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
-    /// <exception cref="InvalidOperationException">The source data value is invalid.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
+    /// <exception cref="InvalidOperationException">The source data value is invalid</exception>
     [UseConverter(typeof(UnreliableDataConverter))]
     public partial ReliableDto Map(UnreliableEntity source);
 }

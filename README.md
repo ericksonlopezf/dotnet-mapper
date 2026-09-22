@@ -29,12 +29,18 @@ High-performance, compile-time, reflection-free, Native AOT-first Object Mapping
 - [Core Use Cases](#-core-use-cases)
 - [Configuration & Integrations](#-configuration--integrations)
   - [Dependency Injection & Assembly Scanning](#dependency-injection--assembly-scanning)
+  - [ASP.NET Core Minimal APIs & OpenAPI Metadata](#aspnet-core-minimal-apis--openapi-metadata)
+  - [Native AOT & JSON Serialization](#native-aot--json-serialization)
   - [Assembly-Wide Defaults](#assembly-wide-defaults)
   - [Functional Result Pattern Integration](#functional-result-pattern-integration)
   - [DDD Domain Primitives Integration](#ddd-domain-primitives-integration)
   - [Mapster Interoperability Bridge](#mapster-interoperability-bridge)
   - [Roslyn Diagnostic Analyzers & Code Fixes](#roslyn-diagnostic-analyzers--code-fixes)
 - [Testing & Quality](#-testing--quality)
+  - [Fluent Assertions & Living Specifications](#fluent-assertions--living-specifications)
+  - [Deterministic Snapshot Testing](#deterministic-snapshot-testing)
+  - [Mutation Testing Quality Gates (Stryker.NET)](#mutation-testing-quality-gates-strykernet)
+  - [Native AOT CI Smoke Gate](#native-aot-ci-smoke-gate)
 - [Performance Benchmarks](#-performance-benchmarks)
 - [Compatibility & Technical Matrix](#-compatibility--technical-matrix)
 - [Architecture & Design Principles](#-architecture--design-principles)
@@ -60,7 +66,7 @@ High-performance, compile-time, reflection-free, Native AOT-first Object Mapping
 - **100% Compile-Time Synthesis**: Synthesizes pure, readable C# code directly into `*.g.cs` files during compilation. Zero runtime reflection, zero dynamic dispatch, and identical performance to hand-optimized assignments (**2.80 ns** physical minimum).
 - **Native AOT & Trimming-First Architecture**: 100% verified with `PublishAot=true` and `PublishTrimmed=true`. Generates zero trim warnings and requires no runtime code emission.
 - **DDD & Invariant Safety**: Enforces domain boundaries through first-class static factory methods (`[MapFactory]`), automatic wrap/unwrap for `[ValueObject]` and `IStrongId`, and strict constructor parameter matching.
-- **Strict-by-Default Compilation Gate**: Every unmapped destination property, nullability mismatch, ambiguous constructor, or cyclic reference fails compilation immediately via diagnostic codes (`ELM001`–`ELM016`) equipped with automated Roslyn CodeFix providers.
+- **Strict-by-Default Compilation Gate**: Every unmapped destination property, nullability mismatch, ambiguous constructor, or cyclic reference fails compilation immediately via diagnostic codes (`ELM001`–`ELM018`) equipped with automated Roslyn CodeFix providers.
 
 ---
 
@@ -70,7 +76,7 @@ High-performance, compile-time, reflection-free, Native AOT-first Object Mapping
 - 🛡️ **Zero Reflection Invariant**: Strictly prohibited from using `System.Reflection`, `Activator`, `Marshal`, or `dynamic` at runtime and compile-time, enforced by Roslyn Analyzer `ELM008`/`ELM009`.
 - 🌲 **NativeAOT & IL Trimming Native**: Designed from inception for `PublishAot=true` and `PublishTrimmed=true`, generating zero trim or dynamic code warnings (`IL2026`, `IL3050`).
 - 🧱 **First-Class Domain-Driven Design Support**: Built-in wrap/unwrap for `[ValueObject]` and `IStrongId`, factory method dispatch via `[MapFactory]`, and immutability preservation.
-- 🚦 **Strict-by-Default Diagnostic Engine**: Emits immediate compile-time errors (`ELM001`–`ELM016`) for unmapped properties, nullability mismatches, and cycles, with automated Roslyn CodeFixes.
+- 🚦 **Strict-by-Default Diagnostic Engine**: Emits immediate compile-time errors (`ELM001`–`ELM018`) for unmapped properties, nullability mismatches, and cycles, with automated Roslyn CodeFixes.
 - 📦 **Zero-Allocation Modern Collections**: Pre-sized loops and native support for `ImmutableArray<T>`, `ImmutableList<T>`, `FrozenSet<T>`, `FrozenDictionary<K,V>`, and spans.
 - 🔌 **Seamless DI & Ecosystem Integration**: Optional assembly-level DI code generation via `[assembly: GenerateMapperRegistration]`, plus official extensions for `Result<T>`, `DomainPrimitives`, and `Mapster`.
 
@@ -98,28 +104,27 @@ High-performance, compile-time, reflection-free, Native AOT-first Object Mapping
 
 ### 🎓 Step-by-Step Interactive Showcase (Levels 00 to 10)
 
-The repository includes a fully compilable, progressive 11-level showcase project under [`sample/EricksonLopez.Mapper.Sample`](https://github.com/ericksonlopezf/dotnet-mapper/tree/main/sample/EricksonLopez.Mapper.Sample):
+The repository includes a fully compilable, progressive 11-level showcase project under [`samples/EricksonLopez.Mapper.Samples`](https://github.com/ericksonlopezf/dotnet-mapper/tree/main/samples/EricksonLopez.Mapper.Samples):
 
 | Level | Topic | Description | Source File |
 |---|---|---|---|
-| [**Level 00**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level0_Conceptual/ConceptualOverview.cs) | **Architecture & Philosophy** | Conceptual foundations, compile-time Roslyn pipeline, and Native AOT rationale | [`ConceptualOverview.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level0_Conceptual/ConceptualOverview.cs) |
-| [**Level 01**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level1_QuickStart/QuickStartDemo.cs) | **Getting Started & Primitives** | Installation, minimal setup, and convention-based partial method mapping | [`QuickStartDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level1_QuickStart/QuickStartDemo.cs) |
-| [**Level 02**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level2_Configuration/ConfigurationDemo.cs) | **Configuration Attributes** | `[MapProperty]`, `[MapIgnore]`, `[MapNullFallback]`, `[ValueObject]`, `[MapValue]`, `[EnumMappingStrategy]` | [`ConfigurationDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level2_Configuration/ConfigurationDemo.cs) |
-| [**Level 03**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level3_RealWorld/RealWorldDemo.cs) | **Real-World Scenarios** | Nested object hierarchies, collections (`ImmutableArray`, `FrozenSet`), and built-in type conversions | [`RealWorldDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level3_RealWorld/RealWorldDemo.cs) |
-| [**Level 04**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level4_Advanced/AdvancedDemo.cs) | **Advanced Integration** | Positional records, factory methods (`[MapFactory]`), and polymorphic dispatch (`[MapDerivedType]`) | [`AdvancedDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level4_Advanced/AdvancedDemo.cs) |
-| [**Level 05**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level5_Processing/ProcessingDemo.cs) | **Parallel & Batch Processing** | Stateless thread safety, parallel batch processing, and PLINQ execution | [`ProcessingDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level5_Processing/ProcessingDemo.cs) |
-| [**Level 06**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level6_ErrorHandling/ErrorHandlingDemo.cs) | **Error Boundaries** | Custom converter exception boundaries, fallback strategies, and defensive transformations | [`ErrorHandlingDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level6_ErrorHandling/ErrorHandlingDemo.cs) |
-| [**Level 07**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level7_Scalability/ScalabilityDemo.cs) | **Throughput & Scalability** | High-throughput in-memory benchmarks sustaining 30M+ mappings/sec | [`ScalabilityDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level7_Scalability/ScalabilityDemo.cs) |
-| [**Level 08**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level8_Customization/CustomizationDemo.cs) | **Custom Converters** | `IConverter<S, D>`, `[UseConverter(Type)]`, and DI-injected converter fields (`[UseConverter(FieldName)]`) | [`CustomizationDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level8_Customization/CustomizationDemo.cs) |
-| [**Level 09**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level9_Extensions/ExtensionsDemo.cs) | **Ecosystem Extensions** | `AddGeneratedMappers()`, `DomainPrimitives`, `Result` monad, and `Mapster` bridge | [`ExtensionsDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level9_Extensions/ExtensionsDemo.cs) |
-| [**Level 10**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level10_Architecture/ArchitectureDemo.cs) | **Clean Architecture & DDD** | Strict boundary enforcement, DTO projections, and `[MapIgnoreSource]` for domain models | [`ArchitectureDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/sample/EricksonLopez.Mapper.Sample/Level10_Architecture/ArchitectureDemo.cs) |
+| [**Level 00**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level0_Conceptual/ConceptualOverview.cs) | **Architecture & Philosophy** | Conceptual foundations, compile-time Roslyn pipeline, and Native AOT rationale | [`ConceptualOverview.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level0_Conceptual/ConceptualOverview.cs) |
+| [**Level 01**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level1_QuickStart/QuickStartDemo.cs) | **Getting Started & Primitives** | Installation, minimal setup, and convention-based partial method mapping | [`QuickStartDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level1_QuickStart/QuickStartDemo.cs) |
+| [**Level 02**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level2_Configuration/ConfigurationDemo.cs) | **Configuration Attributes** | `[MapProperty]`, `[MapIgnore]`, `[MapNullFallback]`, `[ValueObject]`, `[MapValue]`, `[EnumMappingStrategy]` | [`ConfigurationDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level2_Configuration/ConfigurationDemo.cs) |
+| [**Level 03**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level3_RealWorld/RealWorldDemo.cs) | **Real-World Scenarios** | Nested object hierarchies, collections (`ImmutableArray`, `FrozenSet`), and built-in type conversions | [`RealWorldDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level3_RealWorld/RealWorldDemo.cs) |
+| [**Level 04**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level4_Advanced/AdvancedDemo.cs) | **Advanced Integration** | Positional records, factory methods (`[MapFactory]`), and polymorphic dispatch (`[MapDerivedType]`) | [`AdvancedDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level4_Advanced/AdvancedDemo.cs) |
+| [**Level 05**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level5_Processing/ProcessingDemo.cs) | **Parallel & Batch Processing** | Stateless thread safety, parallel batch processing, and PLINQ execution | [`ProcessingDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level5_Processing/ProcessingDemo.cs) |
+| [**Level 06**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level6_ErrorHandling/ErrorHandlingDemo.cs) | **Error Boundaries** | Custom converter exception boundaries, fallback strategies, and defensive transformations | [`ErrorHandlingDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level6_ErrorHandling/ErrorHandlingDemo.cs) |
+| [**Level 07**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level7_Scalability/ScalabilityDemo.cs) | **Throughput & Scalability** | High-throughput in-memory benchmarks sustaining 30M+ mappings/sec | [`ScalabilityDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level7_Scalability/ScalabilityDemo.cs) |
+| [**Level 08**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level8_Customization/CustomizationDemo.cs) | **Custom Converters** | `IConverter<S, D>`, `[UseConverter(Type)]`, and DI-injected converter fields (`[UseConverter(FieldName)]`) | [`CustomizationDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level8_Customization/CustomizationDemo.cs) |
+| [**Level 09**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level9_Extensions/ExtensionsDemo.cs) | **Ecosystem Extensions** | `AddGeneratedMappers()`, `DomainPrimitives`, `Result` monad, and `Mapster` bridge | [`ExtensionsDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level9_Extensions/ExtensionsDemo.cs) |
+| [**Level 10**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level10_Architecture/ArchitectureDemo.cs) | **Clean Architecture & DDD** | Strict boundary enforcement, DTO projections, and `[MapIgnoreSource]` for domain models | [`ArchitectureDemo.cs`](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/samples/EricksonLopez.Mapper.Samples/Level10_Architecture/ArchitectureDemo.cs) |
 
 ### 📖 Technical Reference & Architecture Guides
 
 - [**Architecture & Pipeline**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/architecture.md) — Internal architecture, Roslyn 7-module generator engine, and construction resolution.
 - [**Architectural Decision Records (ADRs)**](https://github.com/ericksonlopezf/dotnet-mapper/tree/main/docs/adr) — 34 ADRs documenting architecture rationale (`ADR-000` to `ADR-021`) and permanent non-goals (`ADR-D01` to `ADR-D12`).
 - [**Design Decisions Summary**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/design-decisions.md) — Consolidated summary of all architectural decision records.
-- [**Technical Audit Report**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/audit-report.md) — Comprehensive technical audit, guarantees, and verification records.
 - [**Competitive Audit & Positioning**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/competitive-audit.md) — In-depth benchmark and feature comparison vs Riok.Mapperly, Mapster, and AutoMapper.
 - [**Master Feature Matrix**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/master-feature-matrix.md) — Complete feature status, classification, and AOT/reflection compliance matrix.
 - [**Cookbook & Practical Recipes**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/cookbook.md) — 28 production-ready recipes covering simple mappings to complex domain pipelines.
@@ -127,7 +132,7 @@ The repository includes a fully compilable, progressive 11-level showcase projec
 - [**API Public Inventory**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/api-inventory.md) — Complete catalog of public types, signatures, and breaking change rules.
 - [**Benchmark Results & Methodology**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/benchmark-results.md) — BenchmarkDotNet methodology, execution instructions, and reproducible data.
 - [**Quality Gates & Code Analysis**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/quality-gates.md) — Mutation testing thresholds, Roslyn diagnostic layers, and NativeAOT validation.
-- [**Troubleshooting & FAQ**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/troubleshooting.md) — Solutions for common compilation issues (`ELM001`–`ELM016`, CS8795, emitting files).
+- [**Troubleshooting & FAQ**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/troubleshooting.md) — Solutions for common compilation issues (`ELM001`–`ELM018`, CS8795, emitting files).
 - [**Migration Guide**](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/migration-guide.md) — Step-by-step migration guide from AutoMapper and Mapster to EricksonLopez.Mapper.
 
 ---
@@ -170,7 +175,7 @@ dotnet add package EricksonLopez.Mapper.Analyzers
 
 ## 🚀 Quick Start
 
-### 1. By-Convention Mapping & Deep Property Flattening
+### 1. By-Convention Mapping & Explicit Nested Path Navigation
 
 Define a `partial class` annotated with `[Mapper]`. The source generator synthesizes the method implementation at compile time:
 
@@ -328,9 +333,11 @@ public class AuditRecord
 [Mapper]
 public partial class AuditMapper
 {
+    [MapProperty(nameof(Order.Id), nameof(AuditRecord.EntityId))]
+    [MapValue(nameof(AuditRecord.Operation), "\"ORDER_PROCESSED\"")]
     [MapValue(nameof(AuditRecord.Timestamp), "System.DateTime.UtcNow")]
     [MapValue(nameof(AuditRecord.Environment), "\"Production\"")]
-    public partial AuditRecord ToAuditRecord(Order order, string operation);
+    public partial AuditRecord ToAuditRecord(Order order);
 }
 ```
 
@@ -520,6 +527,47 @@ builder.Services.AddGeneratedMappers();
 
 ---
 
+### ASP.NET Core Minimal APIs & OpenAPI Metadata
+
+Inject generated mappers directly into route handlers with full OpenAPI schema discovery:
+
+```csharp
+app.MapPost("/orders", (CreateOrderRequest request, OrderMapper mapper) =>
+{
+    Order order = mapper.ToEntity(request);
+    // Persist and project to response DTO
+    OrderSummaryDto response = mapper.ToSummaryDto(order);
+    return Results.Ok(response);
+})
+.WithName("CreateOrder")
+.Produces<OrderSummaryDto>(StatusCodes.Status200OK)
+.ProducesProblem(StatusCodes.Status400BadRequest);
+```
+
+---
+
+### Native AOT & JSON Serialization
+
+Pair compile-time source-generated mappers with trim-safe `System.Text.Json` source generation for 100% Native AOT zero-warning deployments:
+
+```csharp
+using System.Text.Json.Serialization;
+
+[JsonSerializable(typeof(CreateOrderRequest))]
+[JsonSerializable(typeof(OrderSummaryDto))]
+public partial class AppJsonSerializerContext : JsonSerializerContext
+{
+}
+
+// In Program.cs:
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+});
+```
+
+---
+
 ### Assembly-Wide Defaults
 
 Configure consistent mapping defaults across your entire assembly with `[assembly: MapperDefaults]`:
@@ -579,6 +627,8 @@ EmailAddress email = valueToPrimitive.Convert("dev@ericksonlopez.dev");
 
 The `EricksonLopez.Mapper.Mapster` package enables seamless interop between `IConverter<S, D>` and Mapster:
 
+> ⚠️ **Native AOT Note (ADR-007 / AOT-002):** Because Mapster relies on reflection and runtime dynamic code compilation internally, `EricksonLopez.Mapper.Mapster` is explicitly configured with `IsAotCompatible=false` and `IsTrimmable=false`. Its converters carry `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]`. For 100% Native AOT zero-warning deployments, use pure compile-time source generated mappers.
+
 ```csharp
 using EricksonLopez.Mapper.Mapster;
 using Mapster;
@@ -616,6 +666,8 @@ config.UseConverter(new CustomConverterImplementation());
 | **`ELM014`** | Error / Warn | Generator | Enum member has no destination equivalent in strict mode | `[MapEnumValue]` |
 | **`ELM015`** | Warning | Generator | Narrowing numeric conversion potential data loss | Explicit cast |
 | **`ELM016`** | Warning | Generator | String-to-enum conversion runtime parsing risk | Typed enums |
+| **`ELM017`** | Error | Generator | Factory method in `[MapFactory]` not found on target type | Verify method name / accessibility |
+| **`ELM018`** | Warning | Generator | Destination member targeted by duplicate `[MapProperty]` | Remove redundant attribute |
 
 ---
 
@@ -623,14 +675,60 @@ config.UseConverter(new CustomConverterImplementation());
 
 `EricksonLopez.Mapper` enforces continuous verification across multiple defensive testing tiers:
 
-### 1. Deterministic Snapshot Testing (`Verify.Xunit`)
-All generated C# code and diagnostic messages are snapshot-tested using `Verify.SourceGenerators` to guarantee zero syntactic regressions and 100% deterministic output across operating systems.
+### Fluent Assertions & Living Specifications
 
-### 2. Living Specifications & Roy Osherove Naming Pattern (ADR-021)
-All automated tests adhere strictly to **[ADR-021](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/adr/adr-021-test-naming-convention-and-ide1006.md)** using the canonical three-part pattern:
+Test suites verify generated mappers using declarative assertions and strictly adhere to **[ADR-021](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/adr/adr-021-test-naming-convention-and-ide1006.md)** using the Roy Osherove naming pattern:
 $$\textbf{UnitOfWork\_StateUnderTest\_ExpectedBehavior}$$
 
-### 3. Mutation Testing Quality Gates (Stryker.NET)
+```csharp
+using AwesomeAssertions;
+using EricksonLopez.Mapper.Result;
+using EricksonLopez.Result;
+using Xunit;
+
+public class CustomerMapperTests
+{
+    [Fact]
+    public void ToDto_WhenEntityIsValid_ShouldMapAllProperties()
+    {
+        // Arrange
+        var mapper = new CustomerMapper();
+        var entity = new CustomerEntity(new CustomerId(Guid.NewGuid()), "Erickson", new Money(150.00m));
+
+        // Act
+        CustomerDto dto = mapper.ToDto(entity);
+
+        // Assert
+        dto.Should().NotBeNull();
+        dto.Id.Should().Be(entity.Id.Value);
+        dto.Name.Should().Be("Erickson");
+        dto.Balance.Should().Be(150.00m);
+    }
+
+    [Fact]
+    public async Task MapAsync_WhenEntityResultIsSuccess_ShouldProjectAsyncWithoutDeadlocks()
+    {
+        // Arrange
+        var mapper = new CustomerMapper();
+        Task<Result<CustomerEntity>> entityTask = Task.FromResult(
+            Result<CustomerEntity>.Success(new CustomerEntity(new CustomerId(Guid.NewGuid()), "Erickson", new Money(150.00m))));
+
+        // Act - Asynchronous non-blocking functional projection
+        Result<CustomerDto> dtoResult = await entityTask.MapAsync(mapper.ToDto);
+
+        // Assert
+        dtoResult.IsSuccess.Should().BeTrue();
+        dtoResult.Value.Name.Should().Be("Erickson");
+    }
+}
+```
+
+### Deterministic Snapshot Testing
+
+All generated C# code and diagnostic messages are snapshot-tested using `Verify.SourceGenerators` (`Verify.Xunit`) to guarantee zero syntactic regressions and 100% deterministic output across operating systems.
+
+### Mutation Testing Quality Gates (Stryker.NET)
+
 Mutation testing runs across all 7 packages to verify assertion effectiveness:
 
 | Package Scope | Target Mutation Score | Break Threshold (CI Hard Gate) |
@@ -642,14 +740,15 @@ Mutation testing runs across all 7 packages to verify assertion effectiveness:
 | `EricksonLopez.Mapper.Analyzers` | **90%** | **75%** |
 | `EricksonLopez.Mapper.Generator` | **90%** | **75%** |
 
-### 4. Native AOT CI Smoke Gate
+### Native AOT CI Smoke Gate
+
 The `aot-smoke-test.yml` workflow executes `dotnet publish -p:PublishAot=true` on Linux with zero warning tolerance (`TreatWarningsAsErrors=true`) and executes the native binary to verify runtime behavior.
 
 ---
 
 ## ⚡ Performance Benchmarks
 
-> **Benchmark Environment:** .NET 10.0.302 (X64 RyuJIT, AVX-512 enabled), BenchmarkDotNet v0.14.0, Windows 11.
+> **Benchmark Environment:** .NET 10.0.302 (X64 RyuJIT, AVX-512 enabled), BenchmarkDotNet v0.15.8, Windows 11.
 > See [docs/benchmark-results.md](https://github.com/ericksonlopezf/dotnet-mapper/blob/main/docs/benchmark-results.md) for full reproduction instructions.
 
 ### 1. Flat Object / Simple POCO Mapping
@@ -695,7 +794,7 @@ The `aot-smoke-test.yml` workflow executes `dotnet publish -p:PublishAot=true` o
 | **`EricksonLopez.Mapper.Abstractions`** | ✅ | ✅ | ✅ | ✅ | ✅ | Multi-targeted (`netstandard2.0`, `net8/9/10`) |
 | **`EricksonLopez.Mapper.DomainPrimitives`** | ✅ | ✅ | ✅ | ✅ | ✅ | Requires .NET 8+ |
 | **`EricksonLopez.Mapper.Result`** | ✅ | ✅ | ✅ | ✅ | ✅ | Requires .NET 8+ |
-| **`EricksonLopez.Mapper.Mapster`** | ✅ | ✅ | ✅ | ✅ | ✅ | Requires .NET 8+ |
+| **`EricksonLopez.Mapper.Mapster`** | ✅ | ✅ | ✅ | ❌ No (Reflection) | ❌ No (Reflection) | Requires .NET 8+ |
 | **`EricksonLopez.Mapper.Generator`** | ✅ | ✅ | ✅ | N/A | N/A | Build-time Roslyn Analyzer (`netstandard2.0`) |
 | **`EricksonLopez.Mapper.Analyzers`** | ✅ | ✅ | ✅ | N/A | N/A | Build-time Roslyn Analyzer (`netstandard2.0`) |
 
@@ -722,6 +821,8 @@ The `aot-smoke-test.yml` workflow executes `dotnet publish -p:PublishAot=true` o
 
 ---
 
+> 🛡️ **Target Framework & Lifecycle Policy**: First-class multi-targeting across `.NET 10` (Modern LTS), `.NET 9` (STS), and `.NET 8` (Enterprise LTS) — along with `.NET Standard 2.0` for Roslyn analyzers and source generators — is actively maintained. Full backward compatibility is guaranteed until Microsoft officially reaches End-of-Life (EOL) for .NET 8 and .NET 9 in November 2026, at which milestone the ecosystem will transition to .NET 10 and .NET 11.
+
 ## 🏛️ Architecture & Design Principles
 
 ### Core Architectural Invariants
@@ -729,7 +830,7 @@ The `aot-smoke-test.yml` workflow executes `dotnet publish -p:PublishAot=true` o
 1. **Compile-Time Only**: All mapping logic is synthesized into clean, inspectable `*.g.cs` files during compilation. Zero runtime IL emit, zero dynamic method compilation.
 2. **Zero-Reflection Invariant**: Absolute prohibition of `System.Reflection`, `Activator`, `Marshal`, or `dynamic` in runtime packages. Enforced via Roslyn Analyzer `ELM008`/`ELM009`.
 3. **Native AOT & Trimming-First**: Zero trim or dynamic code warnings (`IL2026`, `IL3050`).
-4. **Strict by Default**: Unmapped destination properties, missing constructors, and cyclic dependencies result in immediate compilation errors (`ELM001`–`ELM016`).
+4. **Strict by Default**: Unmapped destination properties, missing constructors, and cyclic dependencies result in immediate compilation errors (`ELM001`–`ELM018`).
 5. **DDD & Invariant Safety**: Domain models with private constructors are instantiated exclusively via factory methods (`[MapFactory]`). Value objects and strongly typed IDs are unwrapped/wrapped natively.
 
 ---
@@ -743,7 +844,7 @@ flowchart TD
     SemanticTransform --> CacheCheck{"Incremental Cache: EquatableArray<T>"}
     CacheCheck -- Unchanged --> SkipGeneration[Reuse Cached Output]
     CacheCheck -- Changed --> Validation["Validation & Diagnostic Engine"]
-    Validation --> ErrorCheck{"Errors Found (ELM001-ELM016)?"}
+    Validation --> ErrorCheck{"Errors Found (ELM001-ELM018)?"}
     ErrorCheck -- Yes --> ReportDiag[Report Diagnostics to Roslyn Compilation]
     ErrorCheck -- No --> EmitCode["CodeEmitter: Synthesize C# *.g.cs"]
     EmitCode --> RegisterOutput["context.AddSource: *.g.cs"]
@@ -751,6 +852,43 @@ flowchart TD
     Start --> DIFilter["Syntax Filter: [assembly: GenerateMapperRegistration]"]
     DIFilter --> DIEmit["DependencyInjectionEmitter: Synthesize AddGeneratedMappers()"]
     DIEmit --> RegisterDI["context.AddSource: MapperServiceCollectionExtensions.g.cs"]
+```
+
+---
+
+### Compile-Time Generator State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> SyntaxDiscovery: Roslyn Incremental Pipeline Detects [Mapper]
+    SyntaxDiscovery --> SemanticAnalysis: Extract Declared Methods & Symbol Info
+    
+    state SemanticAnalysis {
+        [*] --> ParameterValidation: Verify source & destination arity
+        ParameterValidation --> ConstructorResolution: Resolve constructor / [MapFactory]
+        ConstructorResolution --> MemberBinding: Match properties by convention / [MapProperty]
+    }
+    
+    SemanticAnalysis --> DiagnosticFailure: Unmapped member / cycle / unsupported cast
+    SemanticAnalysis --> CodeSynthesis: All members mapped & type-safe
+    
+    state DiagnosticFailure {
+        ELM001: Unmapped Destination Member (Strict)
+        ELM002_007: Constructor / Factory Mismatch
+        ELM004: Nullable-to-NonNullable Mismatch
+        ELM010: Circular Dependency Cycle
+    }
+    
+    DiagnosticFailure --> [*]: Abort compilation with Diagnostic Error & CodeFix
+    
+    state CodeSynthesis {
+        EmitClass: Synthesize partial class wrapper
+        EmitMethod: Synthesize pure C# assignments & sub-mappers
+        EmitReturn: Return instantiated destination instance
+    }
+    
+    CodeSynthesis --> ActiveCompilation: Emit *.g.cs to Output Compilation
+    ActiveCompilation --> [*]: Native AOT-ready zero-reflection binary
 ```
 
 ---
@@ -850,6 +988,14 @@ Synthesized files will appear under `obj/Generated/EricksonLopez.Mapper.Generato
 - **Cause**: Using `System.Reflection`, `Activator.CreateInstance`, or the `dynamic` keyword inside mapper classes.
 - **Solution**: Remove runtime reflection and dynamic constructs. Use strongly-typed partial methods and concrete C# types.
 
+### 6. Circular Reference Graphs (`ELM010`)
+- **Cause**: Source or destination types contain self-referential or mutually circular navigation properties (e.g., `Parent.Children` -> `Child.Parent`). Because compile-time generators synthesize direct inline assignments without runtime object graph tracking dictionaries, circular dependencies would trigger infinite recursion.
+- **Solution**: Break circular references by projecting to dedicated flat DTOs, or apply `[MapIgnore(nameof(ChildDto.Parent))]` on the back-reference navigation property.
+
+### 7. Ambiguous Parameterized Constructors (`ELM007`)
+- **Cause**: Destination type defines multiple public constructors with overlapping or ambiguous parameter signatures, preventing the generator from deterministically selecting an instantiation path.
+- **Solution**: Explicitly designate the intended domain factory method using `[MapFactory("Create")]`, or ensure the target type exposes an unambiguous primary constructor.
+
 ---
 
 ## 🌐 Part of the EricksonLopez Ecosystem
@@ -891,7 +1037,7 @@ Contributions, issues, and feature requests are welcome!
 
 4. **Run Mutation Testing**:
    ```powershell
-   pwsh ./run-stryker.ps1
+   pwsh ./scripts/run-stryker.ps1
    ```
 
 5. **Run Benchmarks**:

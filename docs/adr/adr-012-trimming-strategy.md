@@ -1,5 +1,11 @@
 # ADR-012: Assembly Trimming Strategy
 
+## Status
+Accepted
+
+## Date
+2026-08-13
+
 **Status**: Accepted
 **Date**: 2026-08-13
 **Deciders**: EricksonLopez.Mapper Architecture Team

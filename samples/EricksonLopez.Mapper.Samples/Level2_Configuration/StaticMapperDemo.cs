@@ -70,7 +70,7 @@ public static partial class NotificationMapper
     /// </summary>
     /// <param name="source">The raw notification to map from.</param>
     /// <returns>A new <see cref="NotificationDto"/> containing the mapped values.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public static partial NotificationDto Map(RawNotification source);
 }
 

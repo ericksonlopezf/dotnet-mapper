@@ -6,7 +6,7 @@ This document outlines the delivered capabilities, future exploration areas, and
 
 ---
 
-## Delivered & Production Capabilities (v1.0.0)
+## Delivered & Production Capabilities (v1.0.0 & v2.0.0)
 
 All core capabilities and ecosystem extensions are 100% implemented, tested, and verified:
 
@@ -54,15 +54,15 @@ The following features are **permanently excluded** from this library by explici
 
 | Excluded Feature | ADR Reference | Rationale |
 | :--- | :--- | :--- |
-| **Field Mapping** | [ADR-D01](docs/adr/ADR-D01-no-field-mapping.md) | Fields violate standard DTO encapsulation and public API contracts |
-| **Private Member Bypass** | [ADR-D02](docs/adr/ADR-D02-no-private-member-bypass.md) | Bypassing encapsulation breaks domain invariants; requires unsafe reflection |
-| **Automatic Implicit Flattening** | [ADR-D03](docs/adr/ADR-D03-no-automatic-flattening.md) | Heuristic string splitting is brittle and refactoring-unsafe; use `[MapProperty("A.B", "C")]` |
-| **Circular / Recursive Runtime Graphs** | [ADR-D04](docs/adr/ADR-D04-no-circular-mapping.md) | Runtime reference tracking introduces allocation overhead and AOT hazards |
-| **Existing-Instance Mutation (`Map(src, dest)`)** | [ADR-D05](docs/adr/ADR-D05-no-existing-instance-mapping.md) | In-place mutation breaks immutability, DDD invariants, and concurrent safety |
-| **Automatic Bidirectional / Reverse Mapping** | [ADR-D06](docs/adr/ADR-D06-no-reverse-mapping.md) | Implicit reverse mapping creates hidden coupling and asymmetric bug propagation |
-| **Convention-Based Custom Naming Rules** | [ADR-D07](docs/adr/ADR-D07-no-naming-conventions.md) | Explicitness via attributes is preferred over dynamic naming regex conventions |
-| **Global Runtime Converter Registry** | [ADR-D08](docs/adr/ADR-D08-no-global-converter-registry.md) | Mutable runtime registries break NativeAOT static analysis and tree trimming |
-| **Conditional Mapping via Runtime Delegates** | [ADR-D09](docs/adr/ADR-D09-no-conditional-mapping.md) | Dynamic predicate evaluation incurs delegate allocations and boxing overhead |
-| **Before / After Mapping Lifecycle Hooks** | [ADR-D10](docs/adr/ADR-D10-no-before-after-hooks.md) | Interceptors obscure data flow and add delegate dispatch overhead |
-| **IQueryable Projection (`ProjectTo<T>`)** | [ADR-D11](docs/adr/ADR-D11-no-iqueryable-projection.md) | Expression tree rewriting is AOT-unsafe and hides database query costs |
-| **Generic Runtime `IMapper` Service Facades** | [ADR-D12](docs/adr/ADR-D12-no-imapper-generic-interface.md) | Dynamic method dispatch degrades JIT inlining and type safety |
+| **Field Mapping** | [ADR-D01](adr/adr-d01-no-field-mapping.md) | Fields violate standard DTO encapsulation and public API contracts |
+| **Private Member Bypass** | [ADR-D02](adr/adr-d02-no-private-member-bypass.md) | Bypassing encapsulation breaks domain invariants; requires unsafe reflection |
+| **Automatic Implicit Flattening** | [ADR-D03](adr/adr-d03-no-automatic-flattening.md) | Heuristic string splitting is brittle and refactoring-unsafe; use `[MapProperty("A.B", "C")]` |
+| **Circular / Recursive Runtime Graphs** | [ADR-D04](adr/adr-d04-no-circular-mapping.md) | Runtime reference tracking introduces allocation overhead and AOT hazards |
+| **Existing-Instance Mutation (`Map(src, dest)`)** | [ADR-D05](adr/adr-d05-no-existing-instance-mapping.md) | In-place mutation breaks immutability, DDD invariants, and concurrent safety |
+| **Automatic Bidirectional / Reverse Mapping** | [ADR-D06](adr/adr-d06-no-reverse-mapping.md) | Implicit reverse mapping creates hidden coupling and asymmetric bug propagation |
+| **Convention-Based Custom Naming Rules** | [ADR-D07](adr/adr-d07-no-naming-conventions.md) | Explicitness via attributes is preferred over dynamic naming regex conventions |
+| **Global Runtime Converter Registry** | [ADR-D08](adr/adr-d08-no-global-converter-registry.md) | Mutable runtime registries break NativeAOT static analysis and tree trimming |
+| **Conditional Mapping via Runtime Delegates** | [ADR-D09](adr/adr-d09-no-conditional-mapping.md) | Dynamic predicate evaluation incurs delegate allocations and boxing overhead |
+| **Before / After Mapping Lifecycle Hooks** | [ADR-D10](adr/adr-d10-no-before-after-hooks.md) | Interceptors obscure data flow and add delegate dispatch overhead |
+| **IQueryable Projection (`ProjectTo<T>`)** | [ADR-D11](adr/adr-d11-no-iqueryable-projection.md) | Expression tree rewriting is AOT-unsafe and hides database query costs |
+| **Generic Runtime `IMapper` Service Facades** | [ADR-D12](adr/adr-d12-no-imapper-generic-interface.md) | Dynamic method dispatch degrades JIT inlining and type safety |

@@ -14,7 +14,7 @@ public sealed class DomainPrimitiveToValueConverter<TPrimitive, TValue> : IConve
     where TValue : notnull, IComparable<TValue>, IEquatable<TValue>
 {
     /// <inheritdoc/>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
     public TValue Convert(TPrimitive source)
     {
         ArgumentNullException.ThrowIfNull(source);

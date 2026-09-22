@@ -109,6 +109,31 @@ internal static class DiagnosticDescriptors
         category: "EricksonLopez.Mapper",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// ELM017 — DIAG-007 fix: [MapFactory("MethodName")] referenced a factory method that does not
+    /// exist on the target type. Previously this was silently ignored (falling through to constructors).
+    /// Now emits an Error so the user is informed of the invalid configuration at compile time.
+    /// </summary>
+    public static readonly DiagnosticDescriptor MapFactoryMethodNotFound = new(
+        id: "ELM017",
+        title: "MapFactory method not found",
+        messageFormat: "Factory method '{0}' was not found as a public static method returning '{1}' on the target type. Verify the method name and accessibility.",
+        category: "EricksonLopez.Mapper",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// ELM018 — SEM-003 fix: Duplicate [MapProperty] destination declarations silently overwrote
+    /// each other. Now emits a Warning so the developer knows the second declaration takes precedence.
+    /// </summary>
+    public static readonly DiagnosticDescriptor DuplicateMapPropertyDestination = new(
+        id: "ELM018",
+        title: "Duplicate MapProperty destination member",
+        messageFormat: "Destination member '{0}' is targeted by multiple [MapProperty] attributes. Only the last declaration (source: '{1}') will be used. Remove the redundant attribute to resolve the ambiguity.",
+        category: "EricksonLopez.Mapper",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }
 
 

@@ -10,16 +10,16 @@ For the comprehensive packaging and CPM reference, see [packages.md](packages.md
 
 ```bash
 # Umbrella package (recommended for most applications)
-dotnet add package EricksonLopez.Mapper --version 1.0.0
+dotnet add package EricksonLopez.Mapper --version 2.0.0
 
 # Optional Domain Primitives extension
-dotnet add package EricksonLopez.Mapper.DomainPrimitives --version 1.0.0
+dotnet add package EricksonLopez.Mapper.DomainPrimitives --version 2.0.0
 
 # Optional Result monad extension
-dotnet add package EricksonLopez.Mapper.Result --version 1.0.0
+dotnet add package EricksonLopez.Mapper.Result --version 2.0.0
 
 # Optional Mapster bridge extension
-dotnet add package EricksonLopez.Mapper.Mapster --version 1.0.0
+dotnet add package EricksonLopez.Mapper.Mapster --version 2.0.0
 ```
 
 | Package Name | Target Framework(s) | Role |

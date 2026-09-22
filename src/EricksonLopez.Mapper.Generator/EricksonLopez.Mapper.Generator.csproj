@@ -6,7 +6,7 @@
     <NoWarn>$(NoWarn);RS2008</NoWarn>
     <IsAotCompatible>false</IsAotCompatible>
     <IsTrimmable>false</IsTrimmable>
-    <PackageTags>$(CommonPackageTags);source-generator;roslyn;incremental-generator;code-generation;compile-time;metaprogramming;compiler</PackageTags>
+    <PackageTags>$(CommonPackageTags);mapper;mapping;source-generator;incremental-generator;roslyn;code-generation;compile-time;metaprogramming;compiler</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
